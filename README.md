@@ -1,20 +1,29 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## Opening the prototype
 
-First, run the development server:
+**Reliable way (recommended):** From the project folder, run:
+
+```bash
+cd ~/Documents/Cursor/ypp-prototype
+npm run open
+```
+
+Then open **http://127.0.0.1:3000**. The first run does a full build (~1 min); after that the server stays up until you Ctrl+C. No hot reload—refresh the browser to see changes.
+
+**Why `npm run dev` is flaky:** Next.js 16’s dev server in this setup can hit: port/lock conflicts if a previous run didn’t exit cleanly; timeouts (e.g. telemetry); Turbopack 404s or webpack “stuck on Starting.” Running from the wrong folder (`~` instead of the project) also causes “Missing script” errors. The `open` script avoids the dev server and runs a production build so the app just works.
+
+**If you want dev + hot reload:** Run `npm run dev:clean` from the project folder (it kills anything on 3000/3001 and clears `.next`). If it hangs or errors, use `npm run open` instead.
+
+## Getting Started (dev server)
+
+To run the development server (faster refresh, but see above for known issues):
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) or [http://127.0.0.1:3000](http://127.0.0.1:3000) with your browser.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

@@ -1,0 +1,242 @@
+{
+  "figmaSource": {
+    "canonicalFile": "Platforms Design System",
+    "fileKey": "t4WWyTMA1Vz0EPNs7Nk3On",
+    "url": "https://www.figma.com/design/t4WWyTMA1Vz0EPNs7Nk3On/Platforms-Design-System",
+    "usage": "Use this file as the single source of truth for component specs, tokens, and patterns. When matching UI to Figma, reference node IDs from this file."
+  },
+  "pageHeader": {
+    "figmaRef": "Partner Portal — Page header",
+    "url": "https://www.figma.com/design/ChYlx1SqcGFnjxy6Khtst3/Partner-Portal---1-14-26?node-id=12101-348667",
+    "structure": "Optional breadcrumbs (Level 1 > Current level, 14px medium #232a31) → Title row: page title (24px bold, 28px line-height, #232a31) left-aligned; optional primary button + icon button right-aligned with 12px gap. Optional slot below for filter chips (Sort & filter row).",
+    "component": "PageHeader in src/components/PageHeader.tsx; used on Overview, Settings, Issues, Feed health, Issue detail, and Content performance (KPI) pages."
+  },
+  "overview": {
+    "purpose": "Partner-facing analytics dashboard for monitoring KPI performance, feed health, and issue diagnostics across Yahoo surfaces.",
+    "designGoals": [
+      "Enterprise-grade clarity and trustworthiness for B2B users.",
+      "Information-dense layouts that remain scannable and calm under load.",
+      "Consistent visual hierarchy across KPIs, tables, and detail views.",
+      "Responsive behavior that preserves core structure from laptop to desktop."
+    ],
+    "visualTone": [
+      "Neutral, product-centric, with restrained color usage.",
+      "Functional rather than flashy; emphasis on typography and spacing.",
+      "Status color is reserved for semantic meaning (success, warning, error)."
+    ]
+  },
+  "foundations": {
+    "layout": {
+      "pageMaxWidth": "Approx. 1100–1200px content width centered in the viewport.",
+      "outerPadding": "Horizontal padding of 16–24px on small screens, 24–32px on large screens.",
+      "verticalRhythm": "Vertical spacing in 16–24px increments between major sections.",
+      "gridUsage": "2–4 column responsive grids for KPIs; 2-column master-detail layouts on larger screens."
+    },
+    "typography": {
+      "baseFont": "System or UDS default sans-serif; Phase 2 should align with Figma’s chosen Yahoo typefaces.",
+      "sizes": {
+        "pageTitle": "Approx. 20–24px, medium/semibold weight.",
+        "sectionTitle": "Approx. 14–16px, semibold.",
+        "body": "Approx. 13–14px regular for body copy and table content.",
+        "caption": "Approx. 11–12px for helper text, metadata, and labels."
+      },
+      "hierarchy": [
+        "Use uppercase micro-labels (very small size, increased letter-spacing) above key headings for context.",
+        "Use semibold weight and darker color for primary titles and numeric KPIs.",
+        "Use lighter, desaturated text for secondary descriptions and timestamps."
+      ]
+    },
+    "color": {
+      "background": {
+        "app": "Soft neutral gray background behind content areas.",
+        "surface": "White or near-white cards for primary content blocks."
+      },
+      "text": {
+        "primary": "Dark neutral slate for titles and important values.",
+        "secondary": "Mid-tone neutral slate for secondary info and labels.",
+        "muted": "Lighter neutral slate for metadata and helper text."
+      },
+      "status": {
+        "success": "Emerald/green family for healthy states and improving trends.",
+        "warning": "Amber/orange family for degraded but not critical states.",
+        "error": "Rose/red family for failures, high error rates, and critical issues.",
+        "neutral": "Slate/gray for inactive or baseline states."
+      }
+    },
+    "surfaceAndElevation": {
+      "cards": "Rounded rectangles with light borders and subtle shadows to separate from the background.",
+      "tables": "Flat white surfaces with header underlines and row dividers instead of heavy borders.",
+      "emphasis": "Use border + background contrast first; only add stronger shadows for highly prominent panels."
+    },
+    "interaction": {
+      "hitTargets": "Minimum tap/click target of ~32px height for interactive elements.",
+      "hoverStates": "Subtle background or border changes, avoiding large jumps in color saturation.",
+      "focusStates": "Clearly visible outlines in Phase 2; align with UDS focus-ring tokens."
+    }
+  },
+  "components": {
+    "AppShell": {
+      "role": "Top-level chrome that frames all analytics content: side navigation, global header, and page content area.",
+      "structure": [
+        "Left-aligned vertical sidebar approximately 252px wide, spanning full viewport height.",
+        "Global header strip 64px tall at the top of the main content column, aligned with the Figma shell.",
+        "Main content area below the header with comfortable horizontal padding and scrollable body."
+      ],
+      "visualGuidelines": [
+        "Sidebar is a white surface with a subtle right keyline, 252px wide; nav rows are 14px type with left icons and an active-state indicator line.",
+        "Global header is a white 64px bar with a subtle bottom keyline; left lockup contains a purple circular icon button and the Yahoo Partner Portal wordmark in dark text. Right side contains a purple circular search button and a gray profile button that opens a dropdown menu.",
+        "Main content background remains light neutral; cards and tables sit on white surfaces within this frame.",
+        "Navigation labels in the sidebar should map closely to the Figma structure, even when some entries are non-functional in the prototype."
+      ]
+    },
+    "KpiCard": {
+      "role": "Chip-style tile summarizing a single KPI with a primary value and directional change context. Two-tier layout on Overview: Primary (large) and Secondary (small) chips.",
+      "structure": [
+        "Top row: small, uppercase KPI label on the left; optional delta badge on the right.",
+        "Middle row: large (primary) or medium (secondary) numeric value, optionally with unit suffix (%, $, etc.).",
+        "Bottom row: one-line helper text summarizing the trend or driver."
+      ],
+      "variants": {
+        "primary": "Larger chip: heading row (label + info icon), second row (value + delta pill + sparkline). Sparkline is ECharts line chart, 271×60px, no axes/labels, dark line, small circle points. Used for the top row of two on Overview.",
+        "secondary": "Smaller chip: tighter padding, smaller value (e.g. text-xl), used in the 3+3 grid below. No chart."
+      },
+      "visualGuidelines": [
+        "Card corners are rounded with a light border and soft shadow to feel clickable but not heavy.",
+        "Primary value should be the largest text in the tile; label and helper text are clearly subordinate.",
+        "Delta badge uses color-coded background and text to indicate positive vs. negative vs. neutral movement.",
+        "Trend iconography (chevrons, arrows) is small and secondary to the numeric delta."
+      ]
+    },
+    "DashboardOverview": {
+      "role": "Landing view for the portal, combining KPI snapshots (two-tier chip grid) with content performance tables that support scanning and comparison.",
+      "layout": [
+        "Top: two large Primary KPI chips in a single row (e.g. Total impressions, Estimated revenue).",
+        "Below: six smaller Secondary KPI chips in a 3-column grid (e.g. CTR, Feed error rate, Active feeds, Fill rate, Avg. position, Content items).",
+        "Below: a two-column section pairing a performance panel with a ranked content table (Rank / Title / Views).",
+        "Below: a full-width brand comparison table with inline bar visualization and multiple metrics per brand.",
+        "Sections separated with comfortable vertical space but visually unified via consistent card styling."
+      ],
+      "visualGuidelines": [
+        "Keep KPI tiles tightly aligned in a grid to enable quick side-by-side comparison.",
+        "Tables are flat white surfaces with thin header rules and row dividers; avoid zebra-striping.",
+        "Use underlined text links for content titles and brand names; truncate long text with ellipsis."
+      ]
+    },
+    "RankedContentTable": {
+      "role": "Compact ranked list of top content items for the selected time window, optimized for quick scanning.",
+      "visualGuidelines": [
+        "3-column table: Rank (49px), Title (flex), Views (80px).",
+        "Header row is 33px tall with 14px medium labels; body rows are ~55.8px tall with thin dividers.",
+        "Titles are underlined links in a secondary text color and truncate to one line with ellipsis.",
+        "Numbers are tabular and aligned consistently; keep the table surface flat and clean."
+      ]
+    },
+    "BrandComparisonTable": {
+      "role": "Side-by-side comparison of top brands, combining numeric metrics with an inline bar to communicate magnitude at a glance.",
+      "visualGuidelines": [
+        "Header row is 52px tall; include an 8px spacer row before the data for visual breathing room.",
+        "Data rows are 46px tall with thin row dividers; no zebra-striping.",
+        "Views column includes an inline bar (16px tall) in purple (#6866e9) with asymmetric rounding (2px left, 12px right) plus the formatted number.",
+        "Brand names are underlined; use truncation to keep column widths stable."
+      ]
+    },
+    "FilterChipRow": {
+      "role": "Compact filter controls shown beneath the page header, allowing quick narrowing of the overview dataset.",
+      "visualGuidelines": [
+        "Six pill-shaped chips in a single row with 16px gaps (wrap on smaller screens).",
+        "Chip height is 36px (px=16, py=8) with full rounding.",
+        "Applied chip uses a light blue-gray fill (#f5f8fa) with a 1px dark border (#232a31) and a trailing X icon.",
+        "Dropdown chips use white fill with a 1px muted border (#e0e4e9) and a trailing chevron-down icon.",
+        "Typography is 14px medium with 20px line height, using product sans styling and primary text color (#232a31).",
+        "Dropdown menus are 240px wide, white surface, 8px radius, subtle shadow; multi-select toggles auto-apply on click (no Apply step).",
+        "Date filter presets auto-apply and close; Custom opens a date-range + time + timezone view with Save/Clear (single time applies to both start & end)."
+      ]
+    },
+    "KpiDrilldownPage": {
+      "role": "Detail view for a single KPI, showing how it evolves over time and summarizing performance.",
+      "layout": [
+        "Intro header with micro-label, KPI title, and a short descriptive sentence.",
+        "Main content: left side reserved for a timeseries chart; right side for metric summary and perhaps filters in Phase 2.",
+        "Chart area framed as a card with clear axes and gridlines in Phase 2, currently a placeholder panel."
+      ],
+      "visualGuidelines": [
+        "Keep chart area visually dominant but not overwhelming; surrounding whitespace is important.",
+        "Summary card should read like an executive snapshot: current value, delta, and a brief interpretation.",
+        "If filters or time range selectors are added later, align them with UDS button and chip patterns."
+      ]
+    },
+    "ContentPerformancePage": {
+      "role": "Metric-focused content performance screen with filter chips, a full-width line chart, and a tabbed table that switches metrics.",
+      "layout": [
+        "Page header includes section label + 24px title and a right-side download icon.",
+        "Below the title, a row of filter chips (Last 7 days applied + multiple dropdown chips).",
+        "Full-width line chart card with visible axes and light gridlines.",
+        "Tabbed table section with 6 metric tabs and summary KPI tiles above the table."
+      ],
+      "visualGuidelines": [
+        "Tabs use 14px medium labels; the active tab has a 4px accent underline (#7d2eff).",
+        "Summary tiles are 10px radius, 24px padding, light border (#f0f3f5), with 24px bold values in purple (#7c49fc).",
+        "Table rows are 52px tall with thin dividers (#f0f3f5) and 14px table text."
+      ]
+    },
+    "FeedHealthView": {
+      "role": "Operational dashboard for feed ingestion status and error hotspots.",
+      "layout": [
+        "Header summarizing the number of configured feeds and overall health.",
+        "Single wide table listing feeds with columns for name, vertical, status, error rate, open issues, and last ingested.",
+        "Table designed for quick scanning left-to-right, with key status and numerical columns right-aligned as appropriate."
+      ],
+      "visualGuidelines": [
+        "Status column uses labeled pills with semantic colors and small dot indicators.",
+        "Error rate and open issue counts should be align-right to simplify scanning of magnitudes.",
+        "Last ingested timestamps should use a lighter text color and smaller size to read as metadata."
+      ]
+    },
+    "IssuesList": {
+      "role": "Queue of active feed issues that need investigation or action.",
+      "layout": [
+        "Table with columns for issue title/code, feed name, severity, affected items, and last seen timestamp.",
+        "Issue titles behave as links to the issue detail page.",
+        "Severity is represented as a pill with suitable color intensity corresponding to impact."
+      ],
+      "visualGuidelines": [
+        "Issue titles should be easy to scan; codes can be shown as small uppercase metadata underneath.",
+        "Severity colors must be distinct from generic status colors but still within the overall palette.",
+        "Affected items counts are formatted with thousand separators to reinforce scale."
+      ]
+    },
+    "IssueDetailPage": {
+      "role": "Deep dive into a single issue with full technical context and recommended actions.",
+      "layout": [
+        "Header with micro-label, issue title, and a compact line showing feed and code.",
+        "Two-column body: primary technical details on the left; summary stats and recommended actions stacked on the right.",
+        "Cards aligned vertically with consistent padding and spacing to feel like a coherent detail view."
+      ],
+      "visualGuidelines": [
+        "Technical details may include preformatted or multi-paragraph text; use readable line length and spacing.",
+        "Summary card emphasizes critical numbers (severity, affected items) with clear labels and right alignment.",
+        "Recommended actions appear as an ordered list for easy step-by-step execution."
+      ]
+    }
+  },
+  "phase2Notes": {
+    "udsIntegration": [
+      "Continue using the UDS Tailwind plugin as the basis for typography, spacing, and radii tokens.",
+      "Layer UDS React components (Badge, Chip, IconButton, Menu, Toast, Tooltip, Input) gradually to replace custom primitives where they map cleanly to the Figma design.",
+      "Align global providers such as UDSConfigProvider, UDSBreakpointsConfigProvider, and UDSToastConfigProvider with the final design tokens."
+    ],
+    "visualRefinements": [
+      "Replace generic colors with the exact Yahoo palette and semantic tokens from Figma.",
+      "Adjust typography to match the precise Figma ramp (font families, font weights, line heights).",
+      "Refine spacing and corner radii across cards and tables to match the original Yahoo Partner Portal spec.",
+      "Introduce iconography from UDS Icons for navigation, severity indicators, and contextual actions."
+    ],
+    "consistencyPrinciples": [
+      "Every interactive element should map to a known component pattern (button, chip, link, menu item, etc.).",
+      "Avoid one-off styles; prefer reusable classes or UDS components to encourage consistency across screens.",
+      "When in doubt, align with UDS defaults first, then override minimally to match the Figma source.",
+    "All Figma references (component specs, tokens, patterns) must come from the Platforms Design System file (see figmaSource). Share specific node IDs from that file when requesting visual updates."
+    ]
+  }
+}
+

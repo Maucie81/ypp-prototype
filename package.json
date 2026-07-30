@@ -3,24 +3,33 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "rm -rf .next/dev/lock 2>/dev/null; NEXT_TELEMETRY_DISABLED=1 next dev --hostname 127.0.0.1 --webpack",
+    "dev:clean": "lsof -t -i :3000 -i :3001 | xargs kill -9 2>/dev/null; rm -rf .next node_modules/.cache 2>/dev/null; NEXT_TELEMETRY_DISABLED=1 next dev --hostname 127.0.0.1 --webpack",
+    "build": "next build --webpack",
+    "start": "next start --hostname 127.0.0.1",
+    "open": "lsof -t -i :3000 -i :3001 | xargs kill -9 2>/dev/null; rm -rf .next 2>/dev/null; next build --webpack && next start --hostname 127.0.0.1",
     "lint": "eslint"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.3.0",
+    "@yahoo/uds": "^3.106.0",
+    "@yahoo/uds-icons": "^2.29.0",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.6",
+    "lucide-react": "^0.575.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.20",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
+    "postcss": "^8.4.47",
+    "tailwindcss": "3.4.13",
     "typescript": "^5"
   }
 }

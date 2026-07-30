@@ -1,26 +1,52 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Yahoo fonts – local files in public/fonts */
+
+/* Variable: Yahoo Product Sans VF (CR3 variable font) */
+@font-face {
+  font-family: "Yahoo_Product_Sans_VF";
+  src: url("/fonts/YahooCR3VARBETA-VF.ttf") format("truetype");
+  font-weight: 1 1000;
+  font-display: swap;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Yahoo Sans – static weights */
+@font-face {
+  font-family: "Yahoo Sans";
+  src: url("/fonts/Yahoo Sans-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Yahoo Sans";
+  src: url("/fonts/Yahoo Sans-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Yahoo Sans";
+  src: url("/fonts/Yahoo Sans-Semibold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Yahoo Sans";
+  src: url("/fonts/Yahoo Sans-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Yahoo Product Sans (static) */
+@font-face {
+  font-family: "Yahoo Product Sans";
+  src: url("/fonts/YahooProductSans.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }

@@ -1,0 +1,276 @@
+# Yahoo Partner Portal — Cursor Rules
+# =============================================================================
+# These rules govern ALL UI code generation in this project.
+# Violation of these rules produces inconsistent, non-brand-compliant output.
+# =============================================================================
+
+## 0. MANDATORY PRE-FLIGHT — READ BEFORE EVERY UI TASK
+
+Before creating or modifying ANY component, icon, pattern, page, or styling:
+
+1. **Read `design/design-system.json`** — this is the single source of truth for
+   all tokens, colors, typography, spacing, radii, shadows, component specs, and
+   design principles.
+
+2. **Read `design/figma-library.json`** — this contains stable Figma node IDs for
+   every documented component and all 620 icons. Use these IDs when fetching
+   specs from Figma.
+
+3. **Check `src/components/`** — before building anything new, verify it doesn't
+   already exist as a component.
+
+---
+
+## 1. FIGMA MCP — ALWAYS FETCH BEFORE IMPLEMENTING
+
+When you need the precise spec for a component or icon:
+
+```
+# For custom portal components (Pagination, etc.):
+get_design_context(nodeId="<nodeId from figma-library.json>", fileKey="4KQB7uUMehkWVMXaFbGrMK")
+
+# For icons:
+get_design_context(nodeId="<section nodeId from figma-library.json>", fileKey="hp6GgCsqpJ5dCeTmB43LPf")
+```
+
+**Key node IDs (memorize these):**
+- Pagination component: `nodeId=159:62223, fileKey=4KQB7uUMehkWVMXaFbGrMK`
+- Pagination First page variant: `nodeId=159:62224`
+- Pagination Middle page variant: `nodeId=209:25367`
+- Pagination Last page variant: `nodeId=209:25459`
+- Icon Library entry: `nodeId=23983:14053, fileKey=hp6GgCsqpJ5dCeTmB43LPf`
+- Icon section ARROWS: `nodeId=9714:15067`
+- Icon section NAVIGATION/BUTTONS: `nodeId=9718:13554`
+
+---
+
+## 2. ICONS — ALWAYS USE YAHOO ICON LIBRARY
+
+**NEVER import from lucide-react, heroicons, or any other icon library** for UI icons.
+All icons MUST come from `@yahoo/uds-icons`.
+
+The full icon list (620 icons) is in `design/figma-library.json` under `iconLibrary.allIconNames`.
+
+**Common icon mappings:**
+| UI Purpose          | Yahoo Icon Name      | Section              |
+|---------------------|----------------------|----------------------|
+| Navigation/menu     | `AppSwitcher`        | NAVIGATION / BUTTONS |
+| Search              | `MagnifyingGlass`    | NAVIGATION / BUTTONS |
+| Close/dismiss       | `Cross`, `CrossCircle`| NAVIGATION / BUTTONS |
+| Settings            | `Cog`, `SettingsAlt` | NAVIGATION / BUTTONS |
+| Download            | `Download`           | NAVIGATION / BUTTONS |
+| Upload              | `Upload`             | NAVIGATION / BUTTONS |
+| Filter              | `Filter`             | TOOLBARS             |
+| Edit                | `Edit`, `Pencil`     | TOOLBARS             |
+| Delete              | `Trash`              | OBJECTS              |
+| More (horizontal)   | `More`               | NAVIGATION / BUTTONS |
+| More (vertical)     | `MoreVertical`       | NAVIGATION / BUTTONS |
+| Refresh             | `Refresh`, `Sync`    | NAVIGATION / BUTTONS |
+| Trend up            | `ArrowUp`            | ARROWS               |
+| Trend down          | `ArrowDown`          | ARROWS               |
+| Chevron down        | `ChevronDown`        | ARROWS               |
+| Chevron right       | `ChevronRight`       | ARROWS               |
+| Pagination prev     | `LeftPageArrow`      | ARROWS               |
+| Pagination next     | `RightPageArrow`     | ARROWS               |
+| Success             | `CheckCircle`        | NAVIGATION / BUTTONS |
+| Warning             | `Warning`            | NAVIGATION / BUTTONS |
+| Error               | `Error`              | NAVIGATION / BUTTONS |
+| Info                | `Info`               | NAVIGATION / BUTTONS |
+| Home                | `Home`               | NAVIGATION / BUTTONS |
+| Bell/alerts         | `Bell`, `NotificationBell` | COMMUNICATION  |
+| Profile/user        | `Person`, `Profile`  | PEOPLE               |
+| Calendar            | `Calendar`           | OBJECTS              |
+| Graph/chart         | `Graph`, `PieChart`  | MISC                 |
+| AI features         | `ChatAi`, `WritingAi`| COMMUNICATION/TOOLBARS|
+
+**To look up an icon in Figma:**
+1. Find its name in `design/figma-library.json` → `iconLibrary.allIconNames`
+2. Identify its section from `design/figma-library.json` → `iconLibrary.icons`
+3. Use `get_design_context(nodeId="<section nodeId>", fileKey="hp6GgCsqpJ5dCeTmB43LPf")`
+
+---
+
+## 3. COLORS — NEVER HARDCODE, ALWAYS REFERENCE TOKENS
+
+All colors are defined in `design/design-system.json` → `tokens.colors`.
+
+**Core palette (use these exact values):**
+```
+Text primary:     #232a31
+Text secondary:   #464e56
+Text tertiary:    #6e7780
+Text muted:       #828a93
+Brand purple:     #7d2eff
+Brand alt:        #6866e9
+Alert red:        #d30d2e
+Success green:    #00875a
+Warning amber:    #f59e0b
+Card bg:          #ffffff
+Card border:      #f0f3f5  (default)
+Card border hover:#e0e4e9
+App background:   #f5f5f5
+Header border:    #f0f3f5
+Sidebar border:   #f5f5f5
+Divider (table):  #f0f3f5
+Divider (strong): #e0e4e9
+```
+
+**Status badge colors:**
+```
+Success:  bg-[#ecfdf5] text-[#047857]
+Warning:  bg-[#fffbeb] text-[#b45309]
+Error:    bg-[#fff1f2] text-[#be123c]
+Neutral:  bg-[#f5f5f5] text-[#6e7780]
+```
+
+---
+
+## 4. TYPOGRAPHY — ALWAYS USE YAHOO FONTS
+
+```
+Default font:  font-yahoo-product-sans (Yahoo_Product_Sans_VF variable font)
+Display font:  font-yahoo-sans (for headings if needed)
+```
+
+**Type scale (from design-system.json):**
+```
+Page title:    text-[24px] font-bold leading-7
+Section head:  text-[16px] font-semibold leading-5
+Body/table:    text-[14px] font-normal leading-5
+Caption:       text-[12px] font-normal leading-4
+Micro label:   text-xs font-semibold uppercase tracking-[0.18em] text-[#6e7780]
+KPI value:     text-[24px] font-bold text-[#7c49fc]
+```
+
+---
+
+## 5. SPACING & LAYOUT
+
+- **Base unit:** 4px grid (Tailwind scale)
+- **Card padding:** `px-6 py-4` (standard), `px-6 py-3` (compact)
+- **Section gap:** `gap-10` between major page sections
+- **Card grid gap:** `gap-4`
+- **Filter chip gap:** `gap-4`
+- **Sidebar width:** `w-[252px]`
+- **Header height:** `h-16` (64px)
+- **Minimum tap target:** 32px height
+
+---
+
+## 6. BORDER RADIUS
+
+```
+4px   (rounded-[4px])  — inputs, table corners
+8px   (rounded-[8px])  — KpiCard, dropdown panels
+10px  (rounded-[10px]) — ContentPerformance card
+12px  (rounded-[12px]) — section cards, large dropdowns
+16px  (rounded-[16px]) — PerformancePublishingOutcomeCard
+full  (rounded-full)   — filter chips, icon buttons, pill badges
+```
+
+---
+
+## 7. SHADOWS
+
+```
+Card:         shadow-[0px_1px_2px_rgba(31,31,31,0.05)]
+Card hover:   shadow-[0px_1px_2px_rgba(31,31,31,0.05),0px_1px_4px_rgba(31,31,31,0.10)]
+Dropdown:     shadow-[0px_8px_24px_rgba(16,24,40,0.12)]
+Modal/large:  shadow-[0px_12px_32px_rgba(16,24,40,0.16)]
+```
+
+---
+
+## 8. COMPONENT PATTERNS
+
+### Cards
+```tsx
+<div className="rounded-[12px] border border-[#f0f3f5] bg-white p-6">
+```
+
+### KPI Card
+```tsx
+<div className="rounded-[8px] border border-[#f0f3f5] bg-white px-6 py-4 shadow-[0px_1px_2px_rgba(31,31,31,0.05)] hover:border-[#e0e4e9]">
+```
+
+### Filter Chip (default)
+```tsx
+<button className="h-[36px] rounded-full border border-[#e0e4e9] bg-white px-4 py-2 text-[14px] font-medium text-[#232a31]">
+```
+
+### Filter Chip (applied)
+```tsx
+<button className="h-[36px] rounded-full border border-[#232a31] bg-[#f5f8fa] px-4 py-2 text-[14px] font-medium text-[#232a31]">
+```
+
+### Status Badge
+```tsx
+<span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] bg-[#ecfdf5] text-[#047857]">
+```
+
+### Active Tab
+```tsx
+<button className="py-3 text-[14px] font-medium border-b-4 border-[#7d2eff] text-[#232a31]">
+```
+
+### Inactive Tab
+```tsx
+<button className="py-3 text-[14px] font-medium border-b-4 border-transparent text-[#6e7780]">
+```
+
+---
+
+## 9. TABLE CONVENTIONS
+
+- **No zebra-striping** — flat white surface
+- **Header height:** `h-[33px]` with 14px semibold labels
+- **Body row height:** `h-[55.8px]` standard, `h-[52px]` compact, `h-[46px]` dense
+- **Row divider:** `border-b border-[#f0f3f5]`
+- **Header divider:** `border-b border-[#e0e4e9]`
+- **Link text in tables:** `underline text-[#6e7780] truncate`
+- **Table overflow:** Always wrap in `overflow-x-auto`
+
+---
+
+## 10. DO NOT
+
+- ❌ Do NOT use lucide-react, heroicons, or react-icons for portal icons
+- ❌ Do NOT use arbitrary Tailwind colors (slate-*, gray-*, etc.) for portal surfaces — use the hex values from the token table
+- ❌ Do NOT create a new component that duplicates an existing one in `src/components/`
+- ❌ Do NOT add zebra-striping to tables
+- ❌ Do NOT use box-shadow values not listed in the shadows section
+- ❌ Do NOT hardcode font families — use `font-yahoo-product-sans` or `font-yahoo-sans`
+- ❌ Do NOT import ECharts outside of the existing chart components without checking first
+- ❌ Do NOT add unnecessary abstraction layers — keep components focused and simple
+- ❌ Do NOT add docstrings or comments to code you didn't meaningfully change
+
+---
+
+## 11. TECH STACK REFERENCE
+
+```
+Framework:     Next.js 16 (App Router, TypeScript)
+Styling:       Tailwind CSS 3.4 + @yahoo/uds Tailwind plugin
+Components:    @yahoo/uds (Button, Badge, Chip, IconButton, Input, Menu, etc.)
+Icons:         @yahoo/uds-icons
+Charts:        echarts + echarts-for-react
+Mock data:     @faker-js/faker (seed: 20260227 for reproducibility)
+State:         React Context (src/contexts/TimeFilterContext.tsx)
+Utilities:     src/lib/useOnClickOutside.ts
+```
+
+---
+
+## 12. FILE LOCATIONS
+
+```
+Design system guide:    design/design-system.json   ← READ THIS FIRST
+Figma node IDs:         design/figma-library.json   ← ICON & COMPONENT IDs
+Components:             src/components/
+Pages:                  src/app/
+Global context:         src/contexts/TimeFilterContext.tsx
+Mock data:              src/lib/mockData.ts
+Global styles:          src/app/globals.css
+Tailwind config:        tailwind.config.js
+UDS config:             uds.config.js
+```

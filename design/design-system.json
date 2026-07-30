@@ -1,0 +1,636 @@
+{
+  "_meta": {
+    "description": "Comprehensive design system guide for the Yahoo Partner Portal prototype. This is the single source of truth for all UI decisions. Always consult this file before creating any component, icon, pattern, or styling.",
+    "lastUpdated": "2026-03-01",
+    "project": "Yahoo Partner Portal (ypp-prototype)",
+    "stack": "Next.js 16 + TypeScript + Tailwind CSS 3.4 + @yahoo/uds + @yahoo/uds-icons + ECharts",
+    "figmaLibraryRef": "See design/figma-library.json for all Figma node IDs",
+    "figmaSources": {
+      "customComponents": {
+        "fileKey": "4KQB7uUMehkWVMXaFbGrMK",
+        "name": "Lightyear Custom Components",
+        "howToFetch": "Use Figma MCP: get_design_context(nodeId, fileKey='4KQB7uUMehkWVMXaFbGrMK')"
+      },
+      "iconLibrary": {
+        "fileKey": "hp6GgCsqpJ5dCeTmB43LPf",
+        "name": "Yahoo Icon Library",
+        "howToFetch": "Use Figma MCP: get_design_context(nodeId, fileKey='hp6GgCsqpJ5dCeTmB43LPf')"
+      },
+      "platformsDesignSystem": {
+        "fileKey": "t4WWyTMA1Vz0EPNs7Nk3On",
+        "name": "Platforms Design System",
+        "description": "Additional Yahoo UDS reference for tokens and patterns"
+      }
+    }
+  },
+
+  "designPrinciples": {
+    "tone": "Enterprise-grade clarity and trustworthiness for B2B partner users",
+    "hierarchy": "Information-dense layouts that remain scannable under load",
+    "colorPhilosophy": "Neutral, product-centric, restrained color usage. Status color is reserved strictly for semantic meaning.",
+    "consistency": "Every interactive element must map to a known UDS or portal-defined component pattern",
+    "simplicity": "Functional over flashy — emphasis on typography and spacing over decoration",
+    "rules": [
+      "Never use one-off colors; always reference the color token table below",
+      "Never create a new component without first checking if it already exists in src/components/ or @yahoo/uds",
+      "Always use Yahoo Product Sans VF as the default body/UI font",
+      "Always check design/figma-library.json for the icon name before using lucide-react or other icon libraries",
+      "Always use @yahoo/uds-icons package for icons — never import from lucide-react for UI icons"
+    ]
+  },
+
+  "tokens": {
+    "_source": "Extracted from @yahoo/uds Tailwind plugin and Figma Pagination component (node 159:62223, fileKey 4KQB7uUMehkWVMXaFbGrMK)",
+    "colors": {
+      "palette": {
+        "background": {
+          "primary": "#ffffff",
+          "secondary": "#f5f8fa",
+          "tertiary": "#f0f3f5",
+          "app": "#f5f5f5"
+        },
+        "foreground": {
+          "primary": "#232a31",
+          "secondary": "#464e56",
+          "tertiary": "#6e7780",
+          "muted": "#828a93",
+          "disabled": "#b0b7be"
+        },
+        "line": {
+          "primary": "#232a31",
+          "secondary": "#e0e4e9",
+          "tertiary": "#828a93",
+          "subtle": "#f0f3f5",
+          "divider": "#e3e3e3"
+        },
+        "core": {
+          "brand": "#7d2eff",
+          "brandAlt": "#6866e9",
+          "brandLight": "#7c49fc",
+          "alert": "#d30d2e",
+          "success": "#00875a",
+          "warning": "#f59e0b",
+          "error": "#d30d2e"
+        },
+        "status": {
+          "success": { "bg": "emerald-50 / #ecfdf5", "text": "emerald-700 / #047857", "border": "#00875a" },
+          "warning": { "bg": "amber-50 / #fffbeb", "text": "amber-700 / #b45309", "border": "#f59e0b" },
+          "error": { "bg": "rose-50 / #fff1f2", "text": "rose-700 / #be123c", "border": "#d30d2e" },
+          "neutral": { "bg": "#f5f5f5", "text": "#6e7780", "border": "#e0e4e9" }
+        }
+      },
+      "semantic": {
+        "pageBackground": "#f5f5f5",
+        "cardBackground": "#ffffff",
+        "cardBorder": "#f0f3f5",
+        "cardBorderHover": "#e0e4e9",
+        "cardShadow": "0px 1px 2px rgba(31,31,31,0.05)",
+        "cardShadowHover": "0px 1px 2px rgba(31,31,31,0.05), 0px 1px 4px rgba(31,31,31,0.10)",
+        "sidebarBorder": "#f5f5f5",
+        "headerBorder": "#f0f3f5",
+        "tableRowDivider": "#f0f3f5",
+        "tableHeaderDivider": "#e0e4e9",
+        "accentPrimary": "#7d2eff",
+        "accentBar": "#6866e9",
+        "textPrimary": "#232a31",
+        "textSecondary": "#464e56",
+        "textTertiary": "#6e7780",
+        "textMuted": "#828a93",
+        "filterChipAppliedBg": "#f5f8fa",
+        "filterChipAppliedBorder": "#232a31",
+        "filterChipDefaultBorder": "#e0e4e9",
+        "activeTabUnderline": "#7d2eff",
+        "kpiValueColor": "#7c49fc",
+        "navActiveBar": "#7d2eff"
+      }
+    },
+    "typography": {
+      "_source": "Yahoo Product Sans VF variable font + Figma token vars",
+      "fonts": {
+        "primary": "Yahoo_Product_Sans_VF (variable) — use for all UI text, labels, body",
+        "display": "Yahoo Sans — use for marketing-style headings if needed",
+        "mono": "system monospace — for code/preformatted text only"
+      },
+      "tailwindFamilies": {
+        "primary": "font-yahoo-product-sans",
+        "display": "font-yahoo-sans"
+      },
+      "scale": {
+        "display": { "size": "24px", "weight": "700", "lineHeight": "28px", "use": "Page titles (h1)" },
+        "heading1": { "size": "20px", "weight": "600", "lineHeight": "24px", "use": "Section headings" },
+        "heading2": { "size": "16px", "weight": "600", "lineHeight": "20px", "use": "Card titles, sub-headings" },
+        "label1": { "size": "14px", "weight": "500", "lineHeight": "20px", "use": "Form labels, filter chip text, tab labels", "tokenVar": "var(--fontfamily/label1)" },
+        "label2": { "size": "14px", "weight": "400", "lineHeight": "20px", "use": "Body text, table content, dropdown items", "tokenVar": "var(--fontfamily/label2)" },
+        "caption1": { "size": "13px", "weight": "400", "lineHeight": "16px", "use": "Secondary metadata, timestamps" },
+        "caption2": { "size": "12px", "weight": "400", "lineHeight": "16px", "use": "Helper text, tooltips, smallest labels", "tokenVar": "var(--fontfamily/caption2)" },
+        "micro": { "size": "11px-12px", "weight": "600", "letterSpacing": "0.18em", "textTransform": "uppercase", "use": "Section micro-labels above headings" },
+        "kpiValue": { "size": "24px", "weight": "700", "lineHeight": "28px", "color": "#7c49fc", "font": "Yahoo CR3 VAR BETA Bold (Yahoo_Product_Sans_VF, font-bold)", "use": "Primary KPI tile values" },
+        "kpiValueSecondary": { "size": "20px", "weight": "600", "lineHeight": "24px", "use": "Secondary KPI tile values" }
+      }
+    },
+    "spacing": {
+      "_base": "4px grid. Tailwind scale.",
+      "tokens": {
+        "spacing/0": "0px",
+        "spacing/0_5": "2px",
+        "spacing/1": "4px",
+        "spacing/2": "8px",
+        "spacing/2_5": "10px",
+        "spacing/3": "12px",
+        "spacing/4": "16px",
+        "spacing/5": "20px",
+        "spacing/6": "24px",
+        "spacing/7": "28px",
+        "spacing/8": "32px",
+        "spacing/9": "36px",
+        "spacing/10": "40px"
+      },
+      "usage": {
+        "cardPadding": "px-6 py-4 (24px/16px)",
+        "cardPaddingCompact": "px-4 py-3 (16px/12px)",
+        "sectionGap": "gap-10 (40px) between major page sections",
+        "cardGap": "gap-4 (16px) within card grids",
+        "filterChipGap": "gap-4 (16px) between filter chips",
+        "tableHeaderHeight": "h-[33px]",
+        "tableRowHeight": "h-[55.8px] (standard), h-[52px] (compact), h-[46px] (dense)",
+        "sidebarWidth": "w-[252px]",
+        "headerHeight": "h-16 (64px)",
+        "minimumTapTarget": "32px height"
+      }
+    },
+    "radii": {
+      "sm": "4px — inputs, dropdown menus, table corners",
+      "md": "8px — cards (KpiCard), chips, dropdown panels",
+      "lg": "10px — content performance cards",
+      "xl": "12px — larger section cards",
+      "2xl": "16px — PerformancePublishingOutcomeCard",
+      "full": "9999px — pill-shaped filter chips, icon buttons, avatar circles",
+      "tokens": {
+        "var(--borderradius/sm)": "4px",
+        "var(--borderradius/md)": "8px",
+        "var(--button/primary/borderradius)": "9999px"
+      }
+    },
+    "shadows": {
+      "card": "shadow-[0px_1px_2px_rgba(31,31,31,0.05)]",
+      "cardHover": "shadow-[0px_1px_2px_rgba(31,31,31,0.05),0px_1px_4px_rgba(31,31,31,0.10)]",
+      "dropdown": "shadow-[0px_8px_24px_rgba(16,24,40,0.12)]",
+      "modal": "shadow-[0px_12px_32px_rgba(16,24,40,0.16)]"
+    }
+  },
+
+  "components": {
+    "_howToFetch": "For any component below: use Figma MCP get_design_context(nodeId=<nodeId>, fileKey=<fileKey>) to get full spec and Tailwind code. Node IDs are in design/figma-library.json.",
+
+    "AppShell": {
+      "file": "src/components/AppShell.tsx",
+      "status": "complete",
+      "description": "Top-level chrome: sidebar (252px) + header (64px) + scrollable content area",
+      "layout": "md:grid md:grid-cols-[252px_minmax(0,1fr)] md:grid-rows-[64px_minmax(0,1fr)]",
+      "colors": { "background": "#ffffff", "pageArea": "#f5f5f5" }
+    },
+
+    "GlobalHeader": {
+      "file": "src/components/GlobalHeader.tsx",
+      "status": "complete",
+      "description": "64px white header bar with Yahoo logo, search, and profile dropdown",
+      "dimensions": "h-16 (64px), full width of content column",
+      "colors": { "bg": "#ffffff", "border": "#f0f3f5", "accent": "#7d2eff" },
+      "elements": {
+        "logoButton": "Purple circular icon button, size-11 (44px), bg-[#7d2eff]",
+        "searchButton": "Purple circular icon button, size-9 (36px)",
+        "profileButton": "Gray circular button, size-9 (36px)"
+      }
+    },
+
+    "Sidebar": {
+      "file": "src/components/Sidebar.tsx",
+      "status": "complete",
+      "description": "252px collapsible sidebar with multi-level navigation, business search, and active state indicator",
+      "dimensions": "w-[252px], full viewport height",
+      "colors": { "bg": "#ffffff", "border": "#f5f5f5", "activeBarColor": "#7d2eff", "textPrimary": "#232a31", "textSecondary": "#464e56" },
+      "navRowHeight": "py-3.5 px-5 (active state has 3px left bar in brand purple)"
+    },
+
+    "PageHeader": {
+      "file": "src/components/PageHeader.tsx",
+      "status": "complete",
+      "figmaRef": "https://www.figma.com/design/ChYlx1SqcGFnjxy6Khtst3/Partner-Portal---1-14-26?node-id=12101-348667",
+      "description": "Reusable page header with optional breadcrumbs, title row, optional actions slot, optional filter row",
+      "structure": [
+        "Optional breadcrumbs: 14px medium, color #232a31, '>' separator",
+        "Title row: 24px bold (28px lh) left-aligned; optional primary button + icon button right-aligned with gap-3",
+        "Optional slot below for FilterBar"
+      ]
+    },
+
+    "KpiCard": {
+      "file": "src/components/KpiCard.tsx",
+      "status": "complete",
+      "description": "KPI metric tile with value, delta badge, and optional sparkline",
+      "variants": {
+        "primary": {
+          "description": "Large tile with sparkline — used in top 2-col row of Overview",
+          "dimensions": "min-h-[112px]",
+          "padding": "px-6 py-4",
+          "valueSize": "text-[24px] font-bold"
+        },
+        "secondary": {
+          "description": "Compact tile without sparkline — used in 3-col secondary grid",
+          "dimensions": "min-h-[104px]",
+          "padding": "px-6 py-3",
+          "valueSize": "text-[16px] font-semibold"
+        }
+      },
+      "cardStyle": "rounded-[8px] border border-[#f0f3f5] bg-white shadow-[0px_1px_2px_rgba(31,31,31,0.05)] hover:border-[#e0e4e9] hover:shadow-[0px_1px_2px_rgba(31,31,31,0.05),0px_1px_4px_rgba(31,31,31,0.10)]",
+      "deltaBadge": {
+        "positive": "bg-emerald text-emerald-700",
+        "negative": "bg-rose text-rose-700",
+        "neutral": "bg-slate text-slate-600"
+      }
+    },
+
+    "KpiSparkline": {
+      "file": "src/components/KpiSparkline.tsx",
+      "status": "complete",
+      "description": "Mini ECharts line chart embedded in primary KpiCard",
+      "dimensions": "271×60px responsive width, shrink-0",
+      "style": "No axes, no grid, no labels. Dark line #232a31, 4px circle points. Client component."
+    },
+
+    "Pagination": {
+      "file": "src/components/TablePagination.tsx",
+      "status": "custom-implementation",
+      "figmaNodeId": "159:62223",
+      "figmaFileKey": "4KQB7uUMehkWVMXaFbGrMK",
+      "figmaFetchCommand": "get_design_context(nodeId='159:62223', fileKey='4KQB7uUMehkWVMXaFbGrMK')",
+      "description": "Full pagination bar: page-size selector + range display + first/prev/page-input/next/last navigation",
+      "variants": [
+        { "name": "First page", "nodeId": "159:62224", "description": "First/prev buttons disabled at opacity 20%" },
+        { "name": "Middle page", "nodeId": "209:25367", "description": "All controls active" },
+        { "name": "Last page", "nodeId": "209:25459", "description": "Next/last buttons disabled at opacity 20%" }
+      ],
+      "dimensions": "width: 1243px, height: 76px",
+      "layout": "flex row, px-8 py-4, gap-10 between sections",
+      "colors": {
+        "navButtonBg": "#7d2eff",
+        "navButtonRadius": "9999px (full pill)",
+        "inputBorder": "#828a93",
+        "text": "#232a31"
+      },
+      "subComponents": ["Icon Button (44×44px)", "Input field (36px)", "Dropdown single select"],
+      "spacing": "12px gap between nav buttons, 8px icon button spacing"
+    },
+
+    "FilterChip": {
+      "file": "src/components/FilterChip.tsx",
+      "status": "complete",
+      "description": "Pill-shaped filter control. Two variants: applied (dark border) and dropdown (light border + chevron)",
+      "dimensions": "h-[36px], rounded-full, px-4 py-2",
+      "variants": {
+        "applied": { "bg": "#f5f8fa", "border": "border border-[#232a31]", "description": "Active filter with X icon to clear" },
+        "dropdown": { "bg": "white", "border": "border border-[#e0e4e9]", "description": "Opens a multi-select or date picker" }
+      },
+      "typography": "text-[14px] font-medium leading-5",
+      "gap": "gap-4 (16px) between chips in FilterBar"
+    },
+
+    "FilterBar": {
+      "file": "src/components/filters/FilterBar.tsx",
+      "status": "complete",
+      "description": "Orchestrator for all filter chips — renders DateFilter and MultiSelectDropdown chips in a flex-wrap row",
+      "layout": "flex flex-wrap items-center gap-4"
+    },
+
+    "DateFilter": {
+      "file": "src/components/filters/DateFilter.tsx",
+      "status": "complete",
+      "description": "Date range filter chip. Presets auto-apply; Custom opens a 520px popover with date range + time + timezone + Save/Clear.",
+      "presets": ["last24h", "last7", "last14", "last30", "mtd", "custom"],
+      "dropdownWidth": "w-[520px]",
+      "dropdownStyle": "rounded-[12px] border-[#f0f3f5] shadow-[0px_12px_32px_rgba(16,24,40,0.16)]"
+    },
+
+    "MultiSelectDropdown": {
+      "file": "src/components/filters/MultiSelectDropdown.tsx",
+      "status": "complete",
+      "description": "Searchable multi-select dropdown with checkbox items. Auto-applies on click, no explicit Apply step.",
+      "dimensions": "w-[240px]",
+      "style": "rounded-[8px] border-[#f0f3f5] shadow-[0px_8px_24px_rgba(16,24,40,0.12)]"
+    },
+
+    "MetricTabs": {
+      "file": "src/components/MetricTabs.tsx",
+      "status": "complete",
+      "description": "Horizontal tab strip for switching between metrics. Active tab has 4px underline in brand purple.",
+      "style": "text-[14px] font-medium, active: border-b-4 border-[#7d2eff], inactive: border-b-4 border-[#f0f3f5]",
+      "gap": "gap-6 between tabs, py-3 vertical padding"
+    },
+
+    "TablePagination": {
+      "file": "src/components/TablePagination.tsx",
+      "figmaNodeId": "159:62223",
+      "figmaFileKey": "4KQB7uUMehkWVMXaFbGrMK",
+      "status": "complete",
+      "description": "Table pagination component with show-rows dropdown, range label, and page navigation"
+    },
+
+    "RankedContentTable": {
+      "file": "src/components/RankedContentTable.tsx",
+      "status": "complete",
+      "description": "3-column compact table: Rank (49px fixed), Title (flex), Views (80px fixed)",
+      "headerHeight": "h-[33px]",
+      "rowHeight": "h-[55.8px]",
+      "rowDivider": "border-b border-[#f0f3f5]",
+      "titleStyle": "underline text-[#6e7780] truncate"
+    },
+
+    "BrandComparisonTable": {
+      "file": "src/components/BrandComparisonTable.tsx",
+      "status": "complete",
+      "description": "8-column sortable table with inline bar visualization for Views column",
+      "headerHeight": "h-[52px]",
+      "spacerRowHeight": "h-[8px] bg-[#f5f5f5]",
+      "rowHeight": "h-[46px]",
+      "inlineBar": {
+        "color": "#6866e9",
+        "height": "16px",
+        "borderRadius": "rounded-l-[2px] rounded-r-[12px]"
+      },
+      "minWidth": "min-w-[1076px]"
+    },
+
+    "PublishStatusLabel": {
+      "file": "src/components/PublishStatusLabel.tsx",
+      "status": "complete",
+      "description": "Semantic status badge with dot indicator and colored text/bg",
+      "variants": {
+        "healthy": { "bg": "#ecfdf5", "text": "#047857", "dot": "#00875a" },
+        "warning": { "bg": "#fffbeb", "text": "#b45309", "dot": "#f59e0b" },
+        "error": { "bg": "#fff1f2", "text": "#be123c", "dot": "#d30d2e" },
+        "neutral": { "bg": "#f5f5f5", "text": "#6e7780", "dot": "#828a93" }
+      }
+    },
+
+    "DeltaArrowIcon": {
+      "file": "src/components/DeltaArrowIcon.tsx",
+      "status": "complete",
+      "description": "Custom SVG trend arrow (up/down/left/right). Used in KpiCard delta badges.",
+      "preferFigmaIcon": "Consider replacing with ArrowUp/ArrowDown from @yahoo/uds-icons for consistency"
+    },
+
+    "DownloadButton": {
+      "file": "src/components/DownloadButton.tsx",
+      "status": "complete",
+      "description": "Expandable download button with export format menu (CSV, XLSX, PDF)"
+    },
+
+    "ContentPerformanceChart": {
+      "file": "src/components/ContentPerformanceChart.tsx",
+      "status": "complete",
+      "description": "Full-width ECharts line chart with tooltips and click interaction",
+      "style": "rounded-[10px] bg-white px-3 py-6 h-[280px] border border-[#f0f3f5]"
+    },
+
+    "PerformancePublishingOutcomeCard": {
+      "file": "src/components/PerformancePublishingOutcomeCard.tsx",
+      "status": "complete",
+      "description": "Stacked bar chart (Published/Warnings/Failed) with legend",
+      "style": "rounded-[16px] border border-[#e0e4e9] bg-white px-6 py-4"
+    },
+
+    "VideoCard": {
+      "file": "src/components/VideoCard.tsx",
+      "status": "complete",
+      "description": "Tabbed video metrics card with ECharts line charts per metric"
+    },
+
+    "PublishingVitalsDetail": {
+      "file": "src/components/PublishingVitalsDetail.tsx",
+      "status": "complete",
+      "description": "Large composite component for feed health: feeds table + issues table + charts"
+    }
+  },
+
+  "icons": {
+    "_source": "Yahoo Icon Library (fileKey: hp6GgCsqpJ5dCeTmB43LPf). Full list in design/figma-library.json",
+    "_package": "@yahoo/uds-icons",
+    "totalCount": 620,
+    "variants": ["fill", "outline", "multicolor"],
+    "sizes": [12, 16, 24, 32],
+    "namingConvention": "PascalCase",
+    "usage": {
+      "preferredSize": "16px for inline/table, 20px for navigation, 24px for feature icons",
+      "preferredVariant": "outline for UI chrome; fill for active/selected states; multicolor for weather/illustrations",
+      "doNotUse": "Never import from lucide-react or heroicons for icons that exist in @yahoo/uds-icons"
+    },
+    "portalIconMapping": {
+      "navigation": {
+        "home": "Home",
+        "settings": "Cog or SettingsAlt",
+        "feedHealth": "Pulse or DataSilo",
+        "issues": "Error or Warning",
+        "kpi": "Graph or PieChart"
+      },
+      "actions": {
+        "download": "Download",
+        "upload": "Upload",
+        "filter": "Filter (TOOLBARS section)",
+        "search": "MagnifyingGlass",
+        "close": "Cross or CrossCircle",
+        "edit": "Edit or Pencil",
+        "delete": "Trash",
+        "more": "More or MoreVertical",
+        "refresh": "Refresh or Sync"
+      },
+      "status": {
+        "success": "CheckCircle",
+        "warning": "Warning",
+        "error": "Error or CrossCircle",
+        "info": "Info"
+      },
+      "navigation_controls": {
+        "chevronDown": "ChevronDown (nodeId: 20:4511)",
+        "chevronUp": "ChevronUp",
+        "chevronLeft": "ChevronLeft",
+        "chevronRight": "ChevronRight",
+        "arrowLeft": "ArrowLeft (nodeId: 127:5416)",
+        "arrowRight": "ArrowRight (nodeId: 133:11994)",
+        "paginationPrev": "LeftPageArrow (nodeId: 185:10234)",
+        "paginationNext": "RightPageArrow (nodeId: 185:10284)",
+        "paginationFirst": "DoubleChevronLeft",
+        "paginationLast": "DoubleChevronRight"
+      },
+      "data": {
+        "trending_up": "ArrowUp or DiagonalRightUp",
+        "trending_down": "ArrowDown or DiagonalRightDown",
+        "chart": "Graph",
+        "table": "LayoutGrid"
+      }
+    },
+    "categories": {
+      "ARROWS": { "nodeId": "9714:15067", "count": 61 },
+      "COMMUNICATION": { "nodeId": "9714:20287", "count": 60 },
+      "CURRENCY": { "nodeId": "9714:22999", "count": 9 },
+      "FOOD / DRINK": { "nodeId": "9718:17200", "count": 8 },
+      "GAMES": { "nodeId": "9718:15381", "count": 7 },
+      "HOROSCOPES": { "nodeId": "9718:16290", "count": 12 },
+      "MISC": { "nodeId": "9714:24825", "count": 57 },
+      "NAVIGATION / BUTTONS": { "nodeId": "9718:13554", "count": 55 },
+      "OBJECTS": { "nodeId": "9715:22442", "count": 71 },
+      "PEOPLE": { "nodeId": "9715:23731", "count": 39 },
+      "SPECIALITY": { "nodeId": "9715:25543", "count": 2 },
+      "SPORT": { "nodeId": "9715:26452", "count": 49 },
+      "TECHNOLOGY": { "nodeId": "9709:12982", "count": 59 },
+      "TOOLBARS": { "nodeId": "9709:16182", "count": 56 },
+      "TRANSPORT": { "nodeId": "9715:18323", "count": 10 },
+      "WEATHER": { "nodeId": "11347:9181", "count": 64 },
+      "Yahoo Brand": { "nodeId": "19207:10899", "count": 1 }
+    }
+  },
+
+  "layout": {
+    "appShell": {
+      "sidebar": "252px fixed width, full viewport height, white bg, right border",
+      "header": "64px fixed height, full content-column width, white bg, bottom border",
+      "contentArea": "Remaining space, scrollable, bg-[#f5f5f5], px-4 sm:px-6 lg:px-8 py-6"
+    },
+    "pageMaxWidth": "~1100–1200px content width within the scrollable area",
+    "gridSystem": {
+      "kpiPrimary": "grid grid-cols-2 gap-4 (2 primary KPI cards)",
+      "kpiSecondary": "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 (3 secondary KPI cards)",
+      "overviewTwoCol": "grid lg:grid-cols-2 gap-4 (performance chart + ranked table)",
+      "issueDetail": "grid md:grid-cols-[2fr,1.2fr] gap-4"
+    },
+    "sectionSpacing": "gap-10 (40px) between major page sections",
+    "cardSpacing": "gap-4 (16px) between cards in a grid"
+  },
+
+  "charts": {
+    "_library": "echarts + echarts-for-react",
+    "defaults": {
+      "grid": { "top": 12, "bottom": 8, "left": 48, "right": 16, "containLabel": true },
+      "lineColor": "#7d2eff",
+      "axisLineColor": "#e0e4e9",
+      "tooltipBg": "white",
+      "tooltipBorder": "#e0e4e9",
+      "animation": false
+    },
+    "sparkline": {
+      "dimensions": "271×60px (responsive width)",
+      "lineColor": "#232a31",
+      "pointRadius": 4,
+      "noAxes": true,
+      "noGrid": true,
+      "noLabels": true
+    },
+    "contentPerformance": {
+      "height": "280px",
+      "style": "rounded-[10px] bg-white px-3 py-6 border border-[#f0f3f5]",
+      "lineColor": "#7d2eff",
+      "gridLineColor": "#f0f3f5"
+    },
+    "stackedBar": {
+      "colors": { "published": "#7d2eff", "warnings": "#f59e0b", "failed": "#d30d2e" },
+      "style": "rounded-[16px] border border-[#e0e4e9] bg-white px-6 py-4"
+    }
+  },
+
+  "interactions": {
+    "minimumTapTarget": "32px height (36px preferred for form controls)",
+    "hoverState": "Subtle border darkening (#f0f3f5 → #e0e4e9) + slight shadow increase. Avoid large saturation jumps.",
+    "focusState": "Visible outline ring aligned with UDS focus-ring tokens",
+    "activeTabIndicator": "4px solid underline border-[#7d2eff]",
+    "dropdownDismiss": "Click outside dismisses dropdown (useOnClickOutside hook in src/lib/useOnClickOutside.ts)",
+    "linkStyle": "underline, text-[#6e7780] or text-[#464e56], hover opacity-80"
+  },
+
+  "patterns": {
+    "statusBadge": {
+      "description": "Pill badge with dot indicator and semantic color",
+      "structure": "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px]",
+      "component": "src/components/PublishStatusLabel.tsx",
+      "variants": {
+        "healthy": "bg-[#ecfdf5] text-[#047857]",
+        "warning": "bg-[#fffbeb] text-[#b45309]",
+        "error": "bg-[#fff1f2] text-[#be123c]",
+        "neutral": "bg-[#f5f5f5] text-[#6e7780]"
+      }
+    },
+    "sectionCard": {
+      "description": "Standard white card wrapping a content section",
+      "structure": "rounded-[12px] border border-[#f0f3f5] bg-white p-6"
+    },
+    "tableWrapper": {
+      "description": "Overflow scroll wrapper for wide tables",
+      "structure": "rounded-[4px] overflow-hidden overflow-x-auto"
+    },
+    "microLabel": {
+      "description": "Small uppercase label used above section headings",
+      "structure": "text-xs font-semibold uppercase tracking-[0.18em] text-slate-500"
+    },
+    "pageTitle": {
+      "description": "Page heading with optional breadcrumb",
+      "structure": "text-[24px] font-bold leading-7 text-[#232a31]"
+    },
+    "emptyState": {
+      "description": "Pattern for empty tables/lists",
+      "structure": "text-center py-12 text-[#6e7780] text-[14px]"
+    },
+    "inlineBar": {
+      "description": "Inline data visualization bar within a table cell",
+      "structure": "h-[16px] bg-[#6866e9] rounded-l-[2px] rounded-r-[12px]",
+      "usage": "BrandComparisonTable Views column"
+    }
+  },
+
+  "accessibility": {
+    "ariaLabels": "All interactive elements must have aria-label or aria-labelledby",
+    "paginationAria": {
+      "firstPage": "aria-label='Go to first page'",
+      "prevPage": "aria-label='Go to previous page'",
+      "nextPage": "aria-label='Go to next page'",
+      "lastPage": "aria-label='Go to last page'"
+    },
+    "disabledState": "opacity-20 on nav buttons at first/last page (matching Figma spec)",
+    "focusManagement": "Trap focus in dropdowns/modals; restore focus on close"
+  },
+
+  "codebaseMap": {
+    "components": "src/components/",
+    "pages": "src/app/",
+    "contexts": "src/contexts/TimeFilterContext.tsx",
+    "mockData": "src/lib/mockData.ts",
+    "utilities": "src/lib/useOnClickOutside.ts",
+    "globalStyles": "src/app/globals.css",
+    "tailwindConfig": "tailwind.config.js",
+    "udsConfig": "uds.config.js",
+    "figmaLibrary": "design/figma-library.json",
+    "designSystem": "design/design-system.json (this file)"
+  },
+
+  "implementationStatus": {
+    "complete": [
+      "AppShell", "GlobalHeader", "Sidebar", "PageHeader",
+      "KpiCard (primary+secondary)", "KpiSparkline",
+      "RankedContentTable", "BrandComparisonTable",
+      "FilterChip", "FilterBar", "DateFilter", "MultiSelectDropdown",
+      "ContentPerformanceChart", "MetricTabs",
+      "PerformancePublishingOutcomeCard", "VideoCard",
+      "PublishingVitalsDetail", "PublishStatusLabel",
+      "DeltaArrowIcon", "DownloadButton", "TablePagination"
+    ],
+    "placeholder": [
+      "FeedHealthPage (uses generic slate Tailwind, not Yahoo tokens)",
+      "IssuesPage (uses generic slate Tailwind, not Yahoo tokens)",
+      "IssueDetailPage (uses generic slate Tailwind, not Yahoo tokens)"
+    ],
+    "phase2Todo": [
+      "Replace DeltaArrowIcon SVGs with @yahoo/uds-icons ArrowUp/ArrowDown",
+      "Integrate @yahoo/uds Badge, Chip, IconButton components where applicable",
+      "Align FeedHealthPage, IssuesPage, IssueDetailPage to Yahoo token system",
+      "Add UDSConfigProvider, UDSBreakpointsConfigProvider at app root",
+      "Add focus ring tokens and keyboard navigation"
+    ]
+  }
+}
