@@ -58,12 +58,24 @@ function ResultRow({
   );
 }
 
-function Spinner() {
+function SkeletonRow() {
   return (
-    <div
-      className="size-10 shrink-0 animate-spin rounded-full border-[3px] border-[#e0e4e9] border-t-[#5D5EFF]"
-      aria-hidden
-    />
+    <div className="flex w-full shrink-0 items-center gap-6 px-8 py-5 animate-pulse">
+      <div className="h-[104px] w-[163px] shrink-0 rounded-[4px] bg-[#e0e4e9]" />
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 rounded bg-[#e0e4e9] shrink-0" />
+          <div className="h-4 w-2/3 rounded bg-[#e0e4e9]" />
+        </div>
+        <div className="h-3 w-full rounded bg-[#e0e4e9]" />
+        <div className="h-3 w-4/5 rounded bg-[#e0e4e9]" />
+        <div className="flex items-center gap-4">
+          <div className="h-5 w-20 rounded-full bg-[#e0e4e9]" />
+          <div className="h-3 w-16 rounded bg-[#e0e4e9]" />
+          <div className="h-3 w-16 rounded bg-[#e0e4e9]" />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -98,8 +110,8 @@ export function GlobalSearchDropdown({
 
       {/* Body */}
       {phase === "searching" ? (
-        <div className="flex flex-1 items-center justify-center py-24">
-          <Spinner />
+        <div className="flex-1 overflow-y-auto divide-y divide-[#f5f5f5]">
+          {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />)}
         </div>
       ) : items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-1 py-24">
