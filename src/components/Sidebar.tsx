@@ -18,6 +18,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { DeltaArrowIcon } from "@/components/DeltaArrowIcon";
 import { useOnClickOutside } from "@/lib/useOnClickOutside";
+import { useBrand } from "@/contexts/BrandContext";
 
 // ─── Business / Brand data ────────────────────────────────────────────────────
 
@@ -307,11 +308,20 @@ interface SidebarProps {
   collapsed?: boolean;
 }
 
+function brandById(id: string): Brand {
+  for (const biz of BUSINESSES) {
+    const found = biz.brands.find((b) => b.id === id);
+    if (found) return found;
+  }
+  return DATAPULSE_BRAND;
+}
+
 export function Sidebar({ collapsed = false }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => new Set());
-  const [selectedBrand, setSelectedBrand] = useState<Brand>(DATAPULSE_BRAND);
+  const { brandId, setBrandId } = useBrand();
+  const selectedBrand = brandById(brandId);
 
   function isParentActive(item: TopItem) {
     if (item.href === "/") return pathname === "/" || pathname === "/overview";
@@ -499,7 +509,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         </div>
       ) : (
         <div className="shrink-0 px-[18px] pb-5">
-          <BusinessSearch selected={selectedBrand} onSelect={setSelectedBrand} />
+          <BusinessSearch selected={selectedBrand} onSelect={(b) => setBrandId(b.id)} />
         </div>
       )}
 

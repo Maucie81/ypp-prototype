@@ -10,9 +10,10 @@ import { RankedContentTable } from "@/components/RankedContentTable";
 import { VideoCard } from "@/components/VideoCard";
 import { DownloadButton } from "@/components/DownloadButton";
 import { Icon } from "@yahoo/uds";
-import { ChevronRight, Info } from "@yahoo/uds-icons";
+import { ChevronRight, Eye, Article, Person, Megaphone, Graph, Play, Clock, SpeechBubble } from "@yahoo/uds-icons";
 import Link from "next/link";
 import { useTimeFilter } from "@/contexts/TimeFilterContext";
+import { useBrand } from "@/contexts/BrandContext";
 import {
   getBrandComparisonRows,
   getOverviewPrimaryKpis,
@@ -22,6 +23,17 @@ import {
   getVideoSeriesData,
 } from "@/lib/mockData";
 import type { DateRangePreset, KpiId } from "@/lib/mockData";
+
+const kpiIconMap: Record<KpiId, unknown> = {
+  traffic: Eye,
+  revenue: Article,
+  ctr: Person,
+  errorRate: Megaphone,
+  activeFeeds: Graph,
+  fillRate: Play,
+  avgPosition: Clock,
+  contentItems: SpeechBubble,
+};
 
 /** Map Overview KPI id to Content performance dropdown route. */
 function getKpiContentPerformanceHref(id: KpiId): string {
@@ -40,31 +52,32 @@ function getKpiContentPerformanceHref(id: KpiId): string {
 
 export default function OverviewPage() {
   const { range } = useTimeFilter();
+  const { brandId } = useBrand();
   const rangePreset: DateRangePreset = range;
 
   const primaryKpis = useMemo(
-    () => getOverviewPrimaryKpis(rangePreset),
-    [rangePreset]
+    () => getOverviewPrimaryKpis(rangePreset, brandId),
+    [rangePreset, brandId]
   );
   const secondaryKpis = useMemo(
-    () => getOverviewSecondaryKpis(rangePreset),
-    [rangePreset]
+    () => getOverviewSecondaryKpis(rangePreset, brandId),
+    [rangePreset, brandId]
   );
   const rankedContentRows = useMemo(
-    () => getRankedContentRows(rangePreset),
-    [rangePreset]
+    () => getRankedContentRows(rangePreset, brandId),
+    [rangePreset, brandId]
   );
   const brandComparisonRows = useMemo(
-    () => getBrandComparisonRows(rangePreset),
-    [rangePreset]
+    () => getBrandComparisonRows(rangePreset, brandId),
+    [rangePreset, brandId]
   );
   const publishingOutcomeSeries = useMemo(
-    () => getPublishingOutcomeSeries(rangePreset),
-    [rangePreset]
+    () => getPublishingOutcomeSeries(rangePreset, brandId),
+    [rangePreset, brandId]
   );
   const videoData = useMemo(
-    () => getVideoSeriesData(rangePreset),
-    [rangePreset]
+    () => getVideoSeriesData(rangePreset, brandId),
+    [rangePreset, brandId]
   );
 
   return (
@@ -77,24 +90,9 @@ export default function OverviewPage() {
 
       <div className="mt-[8px] flex flex-col gap-8">
       {/* KPI cards */}
-      <section className="flex flex-col gap-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {primaryKpis.map((kpi) => (
-            <KpiCard
-              key={kpi.id}
-              variant="primary"
-              label={kpi.label}
-              value={kpi.value}
-              delta={kpi.delta}
-              trend={kpi.trend}
-              helperText={kpi.helperText}
-              sparklineData={kpi.sparklineData}
-              href={getKpiContentPerformanceHref(kpi.id)}
-            />
-          ))}
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {secondaryKpis.map((kpi) => (
+      <section>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          {[...primaryKpis, ...secondaryKpis].map((kpi) => (
             <KpiCard
               key={kpi.id}
               variant="secondary"
@@ -104,6 +102,8 @@ export default function OverviewPage() {
               trend={kpi.trend}
               helperText={kpi.helperText}
               href={getKpiContentPerformanceHref(kpi.id)}
+              comparisonDate={kpi.comparisonDate}
+              icon={kpiIconMap[kpi.id]}
             />
           ))}
         </div>

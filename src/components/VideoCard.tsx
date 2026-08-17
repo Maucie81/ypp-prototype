@@ -36,7 +36,11 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
   const seriesData = data[activeTab];
 
   const option = {
-    animation: false,
+    animation: true,
+    animationDuration: 450,
+    animationEasing: "cubicOut" as const,
+    animationDurationUpdate: 450,
+    animationEasingUpdate: "cubicOut" as const,
     tooltip: {
       trigger: "axis",
       backgroundColor: "#232a31",
@@ -130,16 +134,19 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`relative shrink-0 py-3 font-yahoo-product-sans text-[14px] leading-5 focus-visible:outline-none ${
+              className={`group relative shrink-0 py-3 font-yahoo-product-sans text-[14px] leading-5 transition-all focus-visible:outline-none ${
                 activeTab === tab.key
                   ? "font-medium text-[#232a31]"
-                  : "font-normal text-[#464e56] hover:text-[#232a31]"
+                  : "font-normal text-[#464e56] hover:font-medium hover:text-[#232a31]"
               }`}
             >
               {tab.label}
-              {activeTab === tab.key && (
-                <span className="absolute bottom-0 left-0 h-1 w-full rounded-t-sm bg-[#6155F5]" aria-hidden />
-              )}
+              <span
+                className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
+                  activeTab === tab.key ? "bg-[#6155F5]" : "bg-transparent"
+                }`}
+                aria-hidden
+              />
             </button>
           ))}
         </div>
@@ -149,11 +156,10 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
       <div className="relative mt-2">
         <div className="w-full" style={{ height: 280 }}>
           <ReactECharts
-            key={activeTab}
             option={option}
             style={{ height: 280, width: "100%" }}
             opts={{ renderer: "canvas" }}
-            notMerge
+            notMerge={false}
           />
         </div>
       </div>

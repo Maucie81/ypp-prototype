@@ -10,7 +10,11 @@ export function ContentPerformanceChart({
   values: number[];
 }) {
   const option = {
-    animation: false,
+    animation: true,
+    animationDuration: 450,
+    animationEasing: "cubicOut" as const,
+    animationDurationUpdate: 450,
+    animationEasingUpdate: "cubicOut" as const,
     grid: {
       left: 44,
       right: 16,

@@ -287,15 +287,13 @@ function ModalCard({
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`shrink-0 py-3 font-yahoo-product-sans text-[14px] transition-colors ${
-                    activeTab === tab
-                      ? "border-b-4 border-[#7d2eff]"
-                      : "hover:opacity-70"
-                  }`}
+                  className="group relative shrink-0 py-3 font-yahoo-product-sans text-[14px] transition-colors"
                 >
                   <span
-                    className={`font-medium ${
-                      activeTab === tab ? "text-[#232a31]" : "text-[#464e56]"
+                    className={`transition-all ${
+                      activeTab === tab
+                        ? "font-medium text-[#232a31]"
+                        : "font-medium text-[#464e56] group-hover:font-semibold group-hover:text-[#232a31]"
                     }`}
                   >
                     {tab}:{" "}
@@ -303,6 +301,12 @@ function ModalCard({
                   <span className="font-normal text-[#6e7780]">
                     {meta.tabTotals[tab]}
                   </span>
+                  <span
+                    className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
+                      activeTab === tab ? "bg-[#7d2eff]" : "bg-transparent"
+                    }`}
+                    aria-hidden
+                  />
                 </button>
               ))}
             </div>

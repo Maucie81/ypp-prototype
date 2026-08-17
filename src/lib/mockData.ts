@@ -23,6 +23,8 @@ export interface KpiMetric {
 /** Primary KPI with sparkline data for Overview cards. */
 export interface PrimaryKpiMetric extends KpiMetric {
   sparklineData: number[];
+  sparklineXLabels: string[];
+  comparisonDate?: string;
 }
 
 export interface TimeSeriesPoint {
@@ -79,11 +81,9 @@ export type VideoSeriesData = {
   completion: number[];
 };
 
-export function getVideoSeriesData(range?: DateRangePreset): VideoSeriesData {
-  if (range) {
-    const seed = `video-series-${range}`;
-    faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
-  }
+export function getVideoSeriesData(range?: DateRangePreset, brandId?: string): VideoSeriesData {
+  const seedKey = `video-series-${range ?? "default"}-${brandId ?? ""}`;
+  faker.seed(seedKey.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227 + brandSeedOffset(brandId)));
   const { count, hourLabels } = getChartConfig(range);
   const base = new Date();
   if (hourLabels) {
@@ -125,6 +125,11 @@ function formatMMDD(date: Date) {
 /** Optional date range for filter-driven data. Used to seed data per range. */
 export type DateRangePreset = "last7" | "last30" | "last14" | "last24h" | "mtd";
 
+function brandSeedOffset(brandId?: string): number {
+  if (!brandId || brandId === "datapulse-main") return 0;
+  return brandId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) * 1000;
+}
+
 /** Chart point count and whether X axis is hours (for last24h). */
 function getChartConfig(range?: DateRangePreset): { count: number; hourLabels: boolean } {
   switch (range) {
@@ -142,14 +147,47 @@ function getChartConfig(range?: DateRangePreset): { count: number; hourLabels: b
   }
 }
 
+function getComparisonDateString(range?: DateRangePreset): string {
+  const today = new Date();
+  let daysBack: number;
+
+  switch (range) {
+    case "last30":
+      daysBack = 60;
+      break;
+    case "last14":
+      daysBack = 28;
+      break;
+    case "last7":
+      daysBack = 14;
+      break;
+    case "last24h":
+      daysBack = 2;
+      break;
+    case "mtd":
+    default:
+      daysBack = 14;
+  }
+
+  const comparisonDate = new Date(today);
+  comparisonDate.setDate(comparisonDate.getDate() - daysBack);
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = monthNames[comparisonDate.getMonth()];
+  const day = comparisonDate.getDate();
+  const year = comparisonDate.getFullYear();
+
+  return `${month} ${day}, ${year}`;
+}
+
 const HOUR_LABELS_24 = [
   "12am", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am",
   "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm",
 ];
 
-export function getPublishingOutcomeSeries(range?: DateRangePreset): PublishingOutcomeSeries {
-  const seed = range ? `${range}-outcome` : "outcome";
-  faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
+export function getPublishingOutcomeSeries(range?: DateRangePreset, brandId?: string): PublishingOutcomeSeries {
+  const seed = `${range ?? "default"}-outcome-${brandId ?? ""}`;
+  faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227 + brandSeedOffset(brandId)));
 
   const { count, hourLabels } = getChartConfig(range);
   const base = new Date();
@@ -433,52 +471,69 @@ export function getOverviewKpis(): KpiMetric[] {
 }
 
 /** First 2 KPIs for the overview primary (large) chip row, with sparkline data. */
-export function getOverviewPrimaryKpis(range?: DateRangePreset): PrimaryKpiMetric[] {
-  const pointCount = getChartConfig(range).count;
-  if (range) {
-    const seed = `overview-primary-${range}`;
-    faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
-    const out = kpiMetrics.slice(0, 2).map((kpi) => {
-      const { timeSeries, description, ...rest } = kpi;
-      void description;
-      return {
-        ...rest,
-        sparklineData: timeSeries.slice(0, pointCount).map((p) => p.value),
-      };
-    });
-    faker.seed(20260227);
-    return out;
+function generateSparklineXLabels(range?: DateRangePreset): string[] {
+  const { count, hourLabels } = getChartConfig(range);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const labels: string[] = [];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  for (let i = count - 1; i >= 0; i--) {
+    if (hourLabels) {
+      labels.push(HOUR_LABELS_24[count - 1 - i] ?? "");
+    } else {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      labels.push(monthNames[d.getMonth()]!);
+    }
   }
-  return kpiMetrics.slice(0, 2).map((kpi) => {
-    const { timeSeries, description, ...rest } = kpi;
-    void description;
-    return {
-      ...rest,
-      sparklineData: timeSeries.slice(0, pointCount).map((p) => p.value),
-    };
-  });
+  return labels;
 }
 
-/** Next 6 KPIs for the overview secondary (small) chip grid (3+3). */
-export function getOverviewSecondaryKpis(range?: DateRangePreset): KpiMetric[] {
-  if (range) {
-    const seed = `overview-secondary-${range}`;
-    faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
-    const out = kpiMetrics.slice(2, 8).map((kpi) => {
-      const { timeSeries, description, ...rest } = kpi;
-      void timeSeries;
-      void description;
-      return { ...rest };
-    });
-    faker.seed(20260227);
-    return out;
-  }
-  return kpiMetrics.slice(2, 8).map((kpi) => {
-    const { timeSeries, description, ...rest } = kpi;
-    void timeSeries;
-    void description;
-    return rest;
+export function getOverviewPrimaryKpis(range?: DateRangePreset, brandId?: string): PrimaryKpiMetric[] {
+  const pointCount = getChartConfig(range).count;
+  const comparisonDate = getComparisonDateString(range);
+  const sparklineXLabels = generateSparklineXLabels(range);
+  const baseSeed = 20260227 + brandSeedOffset(brandId);
+  const seedKey = `overview-primary-${range ?? "default"}-${brandId ?? ""}`;
+  faker.seed(seedKey.split("").reduce((a, c) => a + c.charCodeAt(0), baseSeed));
+  const out = kpiMetrics.slice(0, 2).map((kpi) => {
+    const sparklineData = Array.from({ length: pointCount }, () =>
+      faker.number.int({ min: kpi.timeSeries[0]!.value * 0.4, max: kpi.timeSeries[0]!.value * 1.6 })
+    );
+    const value = faker.number.int({ min: 1_000_000, max: 15_000_000 }).toLocaleString("en-US");
+    const deltaNum = faker.number.float({ min: -30, max: 50, fractionDigits: 1 });
+    const delta = `${deltaNum >= 0 ? "+" : ""}${deltaNum}%`;
+    const trend: "up" | "down" | "neutral" = deltaNum > 0.5 ? "up" : deltaNum < -0.5 ? "down" : "neutral";
+    return {
+      ...kpi,
+      value,
+      delta,
+      trend,
+      sparklineData,
+      sparklineXLabels,
+      comparisonDate,
+    };
   });
+  faker.seed(20260227);
+  return out;
+}
+
+/** Next 6 KPIs for the overview secondary (small) chip grid. */
+export function getOverviewSecondaryKpis(range?: DateRangePreset, brandId?: string): (KpiMetric & { comparisonDate: string })[] {
+  const comparisonDate = getComparisonDateString(range);
+  const baseSeed = 20260227 + brandSeedOffset(brandId);
+  const seedKey = `overview-secondary-${range ?? "default"}-${brandId ?? ""}`;
+  faker.seed(seedKey.split("").reduce((a, c) => a + c.charCodeAt(0), baseSeed));
+  const out = kpiMetrics.slice(2, 8).map((kpi) => {
+    const deltaNum = faker.number.float({ min: -20, max: 40, fractionDigits: 2 });
+    const delta = kpi.unit === "%"
+      ? `${deltaNum >= 0 ? "+" : ""}${Math.abs(deltaNum).toFixed(2)} pts`
+      : `${deltaNum >= 0 ? "+" : ""}${deltaNum.toFixed(1)}%`;
+    const trend: "up" | "down" | "neutral" = deltaNum > 0.5 ? "up" : deltaNum < -0.5 ? "down" : "neutral";
+    return { ...kpi, delta, trend, comparisonDate };
+  });
+  faker.seed(20260227);
+  return out;
 }
 
 export function getKpiDetail(id: KpiId): KpiDetail | undefined {
@@ -1027,11 +1082,9 @@ export function getContentPerformanceTableByDimension(
   return { firstColHeader: "Category", secondColHeader, rows };
 }
 
-export function getRankedContentRows(range?: DateRangePreset): RankedContentRow[] {
-  if (range) {
-    const seed = `ranked-content-${range}`;
-    faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
-  }
+export function getRankedContentRows(range?: DateRangePreset, brandId?: string): RankedContentRow[] {
+  const seedKey = `ranked-content-${range ?? "default"}-${brandId ?? ""}`;
+  faker.seed(seedKey.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227 + brandSeedOffset(brandId)));
   const headlinePool = [
     "A once-in-a-decade bomb cyclone is taking shape off the West Coast",
     "Italian village offers $1 homes to Americans upset by the U.S. election result",
@@ -1092,11 +1145,9 @@ export function getTopContentRows(range?: DateRangePreset): TopContentRow[] {
   return sorted;
 }
 
-export function getBrandComparisonRows(range?: DateRangePreset): BrandComparisonRow[] {
-  if (range) {
-    const seed = `brand-comparison-${range}`;
-    faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
-  }
+export function getBrandComparisonRows(range?: DateRangePreset, brandId?: string): BrandComparisonRow[] {
+  const seedKey = `brand-comparison-${range ?? "default"}-${brandId ?? ""}`;
+  faker.seed(seedKey.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227 + brandSeedOffset(brandId)));
   const brands = ["Brand A", "Brand B", "Brand C", "Brand D", "Brand E"];
 
   const rows = brands.map((brand, idx) => ({

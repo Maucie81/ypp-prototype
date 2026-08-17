@@ -29,17 +29,23 @@ export function MetricTabs({
             key={tab}
             type="button"
             onClick={() => onChange(tab)}
-            className={`flex items-start py-3 ${
-              isActive ? "border-b-4 border-[#7d2eff]" : "border-b-4 border-transparent"
-            }`}
+            className="group relative flex items-start py-3 transition-colors"
           >
             <span
-              className={`font-yahoo-product-sans text-[14px] font-medium leading-5 ${
-                isActive ? "text-[#232a31]" : "text-[#464e56]"
+              className={`font-yahoo-product-sans text-[14px] leading-5 transition-all ${
+                isActive
+                  ? "font-medium text-[#232a31]"
+                  : "font-medium text-[#464e56] group-hover:font-semibold group-hover:text-[#232a31]"
               }`}
             >
               {TAB_LABELS[tab]}
             </span>
+            <span
+              className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
+                isActive ? "bg-[#7d2eff]" : "bg-transparent"
+              }`}
+              aria-hidden
+            />
           </button>
         );
       })}

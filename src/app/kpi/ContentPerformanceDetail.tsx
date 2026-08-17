@@ -150,41 +150,54 @@ export function ContentPerformanceDetail() {
                     setCurrentPage(1);
                   }}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex-shrink-0 py-3 font-yahoo-product-sans text-[14px] font-medium leading-5 ${
-                    isActive
-                      ? "border-b-4 border-[#7d2eff] text-[#232a31]"
-                      : "border-b-4 border-transparent text-[#464e56] hover:text-[#232a31]"
+                  className={`group relative flex-shrink-0 py-3 font-yahoo-product-sans text-[14px] leading-5 transition-all ${
+                    isActive ? "font-medium text-[#232a31]" : "font-medium text-[#464e56] hover:font-semibold hover:text-[#232a31]"
                   }`}
                 >
                   {label}
+                  <span
+                    className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
+                      isActive ? "bg-[#7d2eff]" : "bg-transparent"
+                    }`}
+                    aria-hidden
+                  />
                 </button>
               );
             })}
             </nav>
           </div>
 
-          <div className="flex items-center gap-6 bg-white py-6">
-            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-6">
+          <div className="flex items-center gap-2 bg-white py-6">
+            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-5">
               <p className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#464e56]">
                 Median performance:
               </p>
-              <p className="font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]">
+              <p
+                key={`median-${dataMetric}-${summary.median}`}
+                className="animate-fade-in-value font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]"
+              >
                 {formatMetricValue(dataMetric, summary.median)}
               </p>
             </div>
-            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-6">
+            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-5">
               <p className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#464e56]">
                 Average performance:
               </p>
-              <p className="font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]">
+              <p
+                key={`average-${dataMetric}-${summary.average}`}
+                className="animate-fade-in-value font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]"
+              >
                 {formatMetricValue(dataMetric, summary.average)}
               </p>
             </div>
-            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-6">
+            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-5">
               <p className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#464e56]">
                 Total performance
               </p>
-              <p className="font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]">
+              <p
+                key={`total-${dataMetric}-${summary.total}`}
+                className="animate-fade-in-value font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]"
+              >
                 {formatMetricValue(dataMetric, summary.total)}
               </p>
             </div>

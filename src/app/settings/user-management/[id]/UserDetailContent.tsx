@@ -229,24 +229,36 @@ export function UserDetailContent({ id }: { id: string }) {
           <button
             type="button"
             onClick={() => setActiveTab("profile")}
-            className={`py-3 font-yahoo-product-sans text-[14px] font-medium leading-5 border-b-4 transition-colors ${
+            className={`group relative py-3 font-yahoo-product-sans text-[14px] leading-5 transition-all ${
               activeTab === "profile"
-                ? "border-[#7d2eff] text-[#232a31]"
-                : "border-transparent text-[#6e7780] hover:text-[#232a31]"
+                ? "font-medium text-[#232a31]"
+                : "font-medium text-[#6e7780] hover:font-semibold hover:text-[#232a31]"
             }`}
           >
             Profile
+            <span
+              className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
+                activeTab === "profile" ? "bg-[#7d2eff]" : "bg-transparent"
+              }`}
+              aria-hidden
+            />
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("notifications")}
-            className={`py-3 font-yahoo-product-sans text-[14px] font-medium leading-5 border-b-4 transition-colors ${
+            className={`group relative py-3 font-yahoo-product-sans text-[14px] leading-5 transition-all ${
               activeTab === "notifications"
-                ? "border-[#7d2eff] text-[#232a31]"
-                : "border-transparent text-[#6e7780] hover:text-[#232a31]"
+                ? "font-medium text-[#232a31]"
+                : "font-medium text-[#6e7780] hover:font-semibold hover:text-[#232a31]"
             }`}
           >
             Notifications
+            <span
+              className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
+                activeTab === "notifications" ? "bg-[#7d2eff]" : "bg-transparent"
+              }`}
+              aria-hidden
+            />
           </button>
         </div>
       </div>
