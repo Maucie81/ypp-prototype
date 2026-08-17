@@ -197,7 +197,7 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
         <div ref={profileRef} className="relative">
           <button
             type="button"
-            className="flex size-9 items-center justify-center rounded-full bg-[#f0f3f5] font-yahoo-product-sans text-[13px] font-medium leading-4 text-[#232a31] hover:bg-[#e9eef2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7d2eff] focus-visible:ring-offset-2"
+            className="flex size-9 items-center justify-center rounded-full bg-[#7d2eff] font-yahoo-product-sans text-[13px] font-medium leading-4 text-white hover:bg-[#6a20e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7d2eff] focus-visible:ring-offset-2"
             aria-haspopup="menu"
             aria-expanded={profileOpen}
             onClick={() => setProfileOpen((v) => !v)}
@@ -214,8 +214,8 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
               {/* Profile header */}
               <div className="px-4 pb-0 pt-2">
                 <div className="flex items-center gap-4 pb-4 pt-5">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#f0f3f5]">
-                    <span className="font-yahoo-product-sans text-[13px] font-medium leading-4 text-[#232a31]">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#7d2eff]">
+                    <span className="font-yahoo-product-sans text-[13px] font-medium leading-4 text-white">
                       JF
                     </span>
                   </div>
