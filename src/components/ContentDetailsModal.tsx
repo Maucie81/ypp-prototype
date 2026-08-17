@@ -5,6 +5,7 @@ import ReactECharts from "echarts-for-react";
 import { Icon } from "@yahoo/uds";
 import { Article, VideoCamera, ImageGallery, Cross, Download } from "@yahoo/uds-icons";
 import { Modal } from "@/components/ui/Modal";
+import { FilterChip } from "@/components/FilterChip";
 import { DeleteContentDialog } from "@/components/DeleteContentDialog";
 import { PublishStatusLabel, type PublishStatusLabelVariant } from "@/components/PublishStatusLabel";
 import {
@@ -233,16 +234,9 @@ function ModalCard({
         <div className="flex items-center justify-between gap-6">
           {/* Filter chips */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full border border-[#2c363f] bg-[#f5f8fa] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-[#232a31]">
-              Last 7 days ×
-            </span>
+            <FilterChip variant="applied" label="Last 7 days" />
             {["Regions", "Devices"].map((label) => (
-              <span
-                key={label}
-                className="inline-flex items-center gap-2 rounded-full border border-[#e0e4e9] bg-white px-4 py-2 font-yahoo-product-sans text-[14px] text-[#232a31]"
-              >
-                {label}
-              </span>
+              <FilterChip key={label} variant="dropdown" label={label} />
             ))}
           </div>
 
