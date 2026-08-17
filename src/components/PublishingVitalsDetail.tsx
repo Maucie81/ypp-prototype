@@ -308,7 +308,7 @@ export function PublishingVitalsDetail({
         </section>
       </PageHeader>
 
-      <div className="mt-[8px] flex flex-col gap-8">
+      <div className="mt-[8px] flex flex-col gap-8 pb-10">
       {/* KPI cards — same treatment as Overview: white bg, border #e0e4e9, rounded-[10px], 24px padding */}
       <section
         aria-label="Feed health KPIs"

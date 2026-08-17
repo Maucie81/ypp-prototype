@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Icon } from "@yahoo/uds";
 import { Cross, LogOut, MagnifyingGlass, Preferences, ThreeLinesSpread } from "@yahoo/uds-icons";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useOnClickOutside } from "@/lib/useOnClickOutside";
 import { useGlobalSearch } from "@/lib/useGlobalSearch";
 import { useDelayedReveal } from "@/lib/useDelayedReveal";
@@ -21,6 +22,7 @@ interface GlobalHeaderProps {
 }
 
 export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeaderProps) {
+  const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -251,7 +253,10 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
                   type="button"
                   role="menuitem"
                   className="flex w-full items-center gap-4 px-5 py-[10px] text-left hover:bg-[#f5f8fa]"
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() => {
+                    setProfileOpen(false);
+                    router.push("/login");
+                  }}
                 >
                   <Icon name={LogOut} size="sm" variant="outline" className="shrink-0 text-[#232a31]" />
                   <span className="font-yahoo-product-sans text-[13px] font-medium leading-4 text-[#232a31]">

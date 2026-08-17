@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@yahoo/uds";
-import { Article } from "@yahoo/uds-icons";
+import { Article, ImageGallery, Info, VideoCamera } from "@yahoo/uds-icons";
 import { DownloadButton } from "@/components/DownloadButton";
 import { PageHeader } from "@/components/PageHeader";
 import { TablePagination } from "@/components/TablePagination";
@@ -45,7 +46,117 @@ const TABLE_DIMENSION_TABS: { id: ContentPerformanceTableDimension; label: strin
 ];
 
 /** Date and Content type have few rows; pagination is disabled for those tabs. */
-const PAGINATION_DISABLED_DIMENSIONS: ContentPerformanceTableDimension[] = ["date", "content_type"];
+const PAGINATION_DISABLED_DIMENSIONS: ContentPerformanceTableDimension[] = ["date", "content_type", "device"];
+
+// Long form used in tooltip definitions
+const METRIC_LABELS: Record<ContentMetricTab, string> = {
+  views: "views",
+  uniques: "unique visitors",
+  reach: "reach",
+  ctr: "click-through rate",
+  dwell: "dwell time",
+  comments: "comments",
+};
+
+// Short form used in stat card headings
+const METRIC_CARD_LABELS: Record<ContentMetricTab, string> = {
+  views: "Views",
+  uniques: "Unique visitors",
+  reach: "Reach",
+  ctr: "CTR",
+  dwell: "Dwell time",
+  comments: "Comments",
+};
+
+const STAT_DEFINITIONS: Record<"median" | "average" | "total", (metricLabel: string) => string> = {
+  median: (m) =>
+    `The middle value when all ${m} data points are sorted. Half of your content performs above this, half below — a reliable baseline that's unaffected by outliers.`,
+  average: (m) =>
+    `The mean ${m} across all content in this view. High-performing content can pull this figure above the median.`,
+  total: (m) =>
+    `The combined sum of all ${m} across every piece of content in the current view.`,
+};
+
+function StatInfoTooltip({ title, definition }: { title: string; definition: string }) {
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const iconRef = useRef<HTMLSpanElement>(null);
+
+  function handleMouseEnter() {
+    if (iconRef.current) {
+      const rect = iconRef.current.getBoundingClientRect();
+      setCoords({ top: rect.top - 8, left: rect.left + rect.width / 2 });
+    }
+    setOpen(true);
+  }
+
+  const tooltip = (
+    <div
+      role="tooltip"
+      style={{
+        position: "fixed",
+        top: coords.top,
+        left: coords.left,
+        transform: "translate(-50%, -100%)",
+        zIndex: 9999,
+        pointerEvents: "none",
+      }}
+      className="flex flex-col items-center"
+    >
+      <div className="flex w-[240px] flex-col gap-1 rounded-[8px] bg-[#232a31] px-4 pb-4 pt-3 shadow-[0px_4px_16px_rgba(0,0,0,0.25)]">
+        <p className="font-yahoo-product-sans text-[12px] font-medium leading-4 text-white">{title}</p>
+        <p className="font-yahoo-product-sans text-[12px] font-normal leading-4 text-white/80">{definition}</p>
+      </div>
+      <svg width="16" height="8" viewBox="0 0 16 8" aria-hidden className="shrink-0">
+        <path d="M0 0 L8 8 L16 0 Z" fill="#232a31" />
+      </svg>
+    </div>
+  );
+
+  return (
+    <span
+      ref={iconRef}
+      className="flex cursor-default items-center"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => setOpen(false)}
+      aria-label={title}
+    >
+      <Icon name={Info} size="xs" variant="outline" className="h-[14px] w-[14px] shrink-0 !text-[#b0b8c1]" />
+      {open && typeof document !== "undefined" && createPortal(tooltip, document.body)}
+    </span>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  tooltipTitle,
+  tooltipDefinition,
+  animKey,
+}: {
+  label: string;
+  value: string;
+  tooltipTitle: string;
+  tooltipDefinition: string;
+  animKey: string;
+}) {
+  return (
+    <div className="flex flex-1 flex-col justify-between gap-5 rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] p-5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#828a93]">
+          {label}
+        </p>
+        <StatInfoTooltip title={tooltipTitle} definition={tooltipDefinition} />
+      </div>
+      <p
+        key={animKey}
+        className="animate-fade-in-value font-yahoo-product-sans text-[28px] font-bold leading-8 text-[#232a31]"
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
 
 function formatMetricValue(metric: ContentMetricTab, value: number) {
   if (metric === "ctr") return `${value.toFixed(2)}%`;
@@ -167,41 +278,35 @@ export function ContentPerformanceDetail() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 bg-white py-6">
-            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-5">
-              <p className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#464e56]">
-                Median performance:
-              </p>
-              <p
-                key={`median-${dataMetric}-${summary.median}`}
-                className="animate-fade-in-value font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]"
-              >
-                {formatMetricValue(dataMetric, summary.median)}
-              </p>
-            </div>
-            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-5">
-              <p className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#464e56]">
-                Average performance:
-              </p>
-              <p
-                key={`average-${dataMetric}-${summary.average}`}
-                className="animate-fade-in-value font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]"
-              >
-                {formatMetricValue(dataMetric, summary.average)}
-              </p>
-            </div>
-            <div className="flex flex-1 flex-col gap-4 rounded-[8px] border border-[#f0f3f5] p-5">
-              <p className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#464e56]">
-                Total performance
-              </p>
-              <p
-                key={`total-${dataMetric}-${summary.total}`}
-                className="animate-fade-in-value font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#7c49fc]"
-              >
-                {formatMetricValue(dataMetric, summary.total)}
-              </p>
-            </div>
-          </div>
+          {(() => {
+            const metricLabel = METRIC_LABELS[dataMetric] ?? dataMetric;
+            const cardLabel = METRIC_CARD_LABELS[dataMetric] ?? dataMetric;
+            return (
+              <div className="flex items-stretch gap-3 bg-white py-6">
+                <StatCard
+                  label={`Median ${cardLabel}`}
+                  value={formatMetricValue(dataMetric, summary.median)}
+                  tooltipTitle={`Median ${cardLabel}`}
+                  tooltipDefinition={STAT_DEFINITIONS.median(metricLabel)}
+                  animKey={`median-${dataMetric}-${summary.median}`}
+                />
+                <StatCard
+                  label={`Average ${cardLabel}`}
+                  value={formatMetricValue(dataMetric, summary.average)}
+                  tooltipTitle={`Average ${cardLabel}`}
+                  tooltipDefinition={STAT_DEFINITIONS.average(metricLabel)}
+                  animKey={`average-${dataMetric}-${summary.average}`}
+                />
+                <StatCard
+                  label={`Total ${cardLabel}`}
+                  value={formatMetricValue(dataMetric, summary.total)}
+                  tooltipTitle={`Total ${cardLabel}`}
+                  tooltipDefinition={STAT_DEFINITIONS.total(metricLabel)}
+                  animKey={`total-${dataMetric}-${summary.total}`}
+                />
+              </div>
+            );
+          })()}
 
           <div className="flex flex-col overflow-hidden rounded-[8px] border border-[#f0f3f5] bg-white">
             <div className="overflow-hidden">
@@ -235,7 +340,13 @@ export function ContentPerformanceDetail() {
                         {tableDimension === "headline" ? (
                           <span className="flex items-center gap-2">
                             <Icon
-                              name={Article}
+                              name={
+                                row.contentType === "video"
+                                  ? VideoCamera
+                                  : row.contentType === "slideshow"
+                                  ? ImageGallery
+                                  : Article
+                              }
                               size="sm"
                               variant="outline"
                               className="h-4 w-4 shrink-0 text-[#464e56]"

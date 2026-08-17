@@ -940,6 +940,7 @@ export type ContentPerformanceTableDimension =
 export interface ContentPerformanceDimensionRow {
   label: string;
   value: number;
+  contentType?: string;
 }
 
 const HEADLINE_POOL = [
@@ -972,7 +973,7 @@ const HEADLINE_POOL = [
 
 const CONTENT_TYPES = ["Article", "Video", "Slideshow", "Gallery", "Live"];
 const REGIONS = ["United States", "United Kingdom", "Canada", "Australia", "Germany", "France"];
-const DEVICES = ["Desktop", "Mobile", "Tablet"];
+const DEVICES = ["Desktop", "Mobile", "Tablet", "Connected TV"];
 const CATEGORIES = ["News", "Sports", "Finance", "Entertainment", "Life", "Tech"];
 const PAGINATED_DIMENSION_ROW_COUNT = 28;
 
@@ -1024,6 +1025,7 @@ export function getContentPerformanceTableByDimension(
     const rows: ContentPerformanceDimensionRow[] = labels.map((label) => ({
       label,
       value: getMetricValueForDimension(metric),
+      contentType: faker.helpers.arrayElement(["article", "video", "slideshow"] as const),
     }));
     if (range) faker.seed(20260227);
     return { firstColHeader: "Headline", secondColHeader, rows };
@@ -1054,16 +1056,10 @@ export function getContentPerformanceTableByDimension(
   }
 
   if (dimension === "device") {
-    const rows: ContentPerformanceDimensionRow[] = Array.from(
-      { length: PAGINATED_DIMENSION_ROW_COUNT },
-      (_, i) => ({
-        label:
-          DEVICES.length > 0 && i >= DEVICES.length
-            ? `${DEVICES[i % DEVICES.length]!} (${Math.floor(i / DEVICES.length) + 1})`
-            : DEVICES[i % DEVICES.length]!,
-        value: getMetricValueForDimension(metric),
-      }),
-    );
+    const rows: ContentPerformanceDimensionRow[] = DEVICES.map((label) => ({
+      label,
+      value: getMetricValueForDimension(metric),
+    }));
     if (range) faker.seed(20260227);
     return { firstColHeader: "Device", secondColHeader, rows };
   }

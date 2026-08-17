@@ -53,7 +53,7 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
         fontFamily: "Yahoo_Product_Sans_VF, sans-serif",
       },
     },
-    grid: { left: 44, right: 16, top: 12, bottom: 40 },
+    grid: { left: 4, right: 16, top: 12, bottom: 28, containLabel: true },
     xAxis: {
       type: "category",
       data: data.xLabels,
@@ -111,7 +111,7 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
   };
 
   return (
-    <section className="w-full rounded-[8px] border border-[#e0e4e9] bg-white p-6">
+    <section className="w-full rounded-[8px] border border-[#e0e4e9] bg-white pt-6 px-6 pb-3">
       {/* Header */}
       <header className="flex items-center justify-between gap-4">
         <h2 className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#464e56]">

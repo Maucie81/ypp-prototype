@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { BrandComparisonTable } from "@/components/BrandComparisonTable";
@@ -55,6 +55,21 @@ export default function OverviewPage() {
   const { brandId, isSwitching } = useBrand();
   const rangePreset: DateRangePreset = range;
 
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  useEffect(() => {
+    if (sessionStorage.getItem("authLoading") === "true") {
+      sessionStorage.removeItem("authLoading");
+      setIsAuthLoading(true);
+      // No cleanup returned — Strict Mode double-invocation removes the key on
+      // the first pass, so the second pass is a no-op. The timer must fire
+      // naturally to flip the flag; cancelling it in cleanup would leave the
+      // skeleton stuck forever in development.
+      setTimeout(() => setIsAuthLoading(false), 2000);
+    }
+  }, []);
+
+  const showSkeleton = isSwitching || isAuthLoading;
+
   const primaryKpis = useMemo(
     () => getOverviewPrimaryKpis(rangePreset, brandId),
     [rangePreset, brandId]
@@ -89,7 +104,7 @@ export default function OverviewPage() {
       </PageHeader>
 
       <div className="mt-[8px] flex flex-col gap-8">
-      {isSwitching ? (
+      {showSkeleton ? (
         <>
           {/* KPI skeletons */}
           <section>

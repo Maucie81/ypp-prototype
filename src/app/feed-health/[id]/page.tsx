@@ -411,7 +411,7 @@ export default function FeedHealthDetailPage({
 
   return (
     <>
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 pb-10">
       {/* Page header */}
       <PageHeader
         breadcrumbs={[

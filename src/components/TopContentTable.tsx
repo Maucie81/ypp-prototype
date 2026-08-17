@@ -75,7 +75,7 @@ function compare(a: TopContentRow, b: TopContentRow, key: SortKey, dir: SortDir)
 }
 
 const headerRowClass =
-  "h-[52px] cursor-pointer select-none border-b border-[#e0e4e9] bg-white px-3 align-middle font-yahoo-product-sans text-[14px] font-medium leading-5 hover:bg-[#f9fafb] transition-colors duration-100";
+  "group h-[52px] cursor-pointer select-none border-b border-[#e0e4e9] bg-white px-3 align-middle font-yahoo-product-sans text-[14px] font-medium leading-5 hover:bg-[#f9fafb] transition-colors duration-100";
 
 export function TopContentTable({
   rows,
@@ -121,11 +121,20 @@ export function TopContentTable({
               }`}
             >
               {header}
-              {isSorted && (
+              {isSorted ? (
                 <DeltaArrowIcon
                   direction={sortDir === "desc" ? "up" : "down"}
                   className="h-3 w-3 shrink-0 text-[#6a6a6a]"
                 />
+              ) : (
+                <svg
+                  width="10" height="12" viewBox="0 0 10 12" fill="none"
+                  aria-hidden
+                  className="h-3 w-2.5 shrink-0 text-[#b0b8c1] opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <path d="M3 4.5L5 2L7 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 7.5L5 10L7 7.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               )}
             </span>
           </th>

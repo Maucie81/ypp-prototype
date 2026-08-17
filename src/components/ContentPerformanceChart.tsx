@@ -16,10 +16,11 @@ export function ContentPerformanceChart({
     animationDurationUpdate: 450,
     animationEasingUpdate: "cubicOut" as const,
     grid: {
-      left: 44,
+      left: 4,
       right: 16,
       top: 12,
       bottom: 32,
+      containLabel: true,
     },
     tooltip: {
       trigger: "axis",
