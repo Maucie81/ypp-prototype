@@ -67,14 +67,14 @@ export function BrandComparisonTable({ rows }: { rows: BrandComparisonRow[] }) {
     <div className="w-full overflow-hidden rounded-[4px]">
       <table className="w-full table-fixed border-separate border-spacing-0">
         <colgroup>
-          <col className="w-[7%]" />
-          <col className="w-[10%]" />
-          <col className="w-[25%]" />
-          <col className="w-[11.6%]" />
-          <col className="w-[11.6%]" />
-          <col className="w-[11.6%]" />
-          <col className="w-[11.6%]" />
-          <col className="w-[11.6%]" />
+          <col className="w-[6%]" />
+          <col className="w-[9%]" />
+          <col className="w-[20%]" />
+          <col className="w-[13%]" />
+          <col className="w-[13%]" />
+          <col className="w-[13%]" />
+          <col className="w-[13%]" />
+          <col className="w-[13%]" />
         </colgroup>
 
         <thead>
@@ -88,7 +88,7 @@ export function BrandComparisonTable({ rows }: { rows: BrandComparisonRow[] }) {
                   scope="col"
                   onClick={() => handleSort(col.key)}
                   className={[
-                    "h-[52px] cursor-pointer select-none border-b bg-white px-3 align-middle",
+                    "h-[52px] cursor-pointer select-none border-b bg-white px-2 align-middle",
                     "font-yahoo-product-sans text-[14px] font-medium leading-5",
                     "hover:bg-[#f9fafb] transition-colors duration-100",
                     isViews ? "border-[#f0f3f5]" : "border-[#e0e4e9]",
@@ -97,7 +97,7 @@ export function BrandComparisonTable({ rows }: { rows: BrandComparisonRow[] }) {
                   ].join(" ")}
                 >
                   <span
-                    className={`inline-flex items-center gap-1 ${
+                    className={`inline-flex items-center gap-1 whitespace-nowrap ${
                       col.align === "center" ? "justify-center w-full" : ""
                     }`}
                   >

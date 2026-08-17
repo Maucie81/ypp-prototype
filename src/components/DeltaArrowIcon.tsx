@@ -3,11 +3,7 @@
 /**
  * 12px directional arrow from Partner Portal Figma (variant=fill, size=12).
  * Partner Portal: O13AXE5XMVQSX9K8WhSKJ1, node 40000006-33896.
- * Rendered as mask so className (e.g. text-[#0c7a58]) controls color; rotated by direction.
  */
-const FIGMA_ARROW_UP_12_FILL_URL =
-  "https://www.figma.com/api/mcp/asset/890a4772-bbe6-4d1e-adc2-a1b1b89e9a50";
-
 type Direction = "up" | "down" | "left" | "right";
 
 const ROTATION: Record<Direction, string> = {
@@ -28,19 +24,13 @@ export function DeltaArrowIcon({
 }) {
   return (
     <span
-      className={`inline-block h-3 w-3 shrink-0 bg-current ${className ?? ""}`}
-      style={{
-        maskImage: `url(${FIGMA_ARROW_UP_12_FILL_URL})`,
-        maskSize: "contain",
-        maskRepeat: "no-repeat",
-        maskPosition: "center",
-        WebkitMaskImage: `url(${FIGMA_ARROW_UP_12_FILL_URL})`,
-        WebkitMaskSize: "contain",
-        WebkitMaskRepeat: "no-repeat",
-        WebkitMaskPosition: "center",
-        transform: `rotate(${ROTATION[direction]})`,
-      }}
+      className={`inline-block h-3 w-3 shrink-0 text-current ${className ?? ""}`}
+      style={{ transform: `rotate(${ROTATION[direction]})` }}
       aria-hidden={ariaHidden}
-    />
+    >
+      <svg width="10" height="12" viewBox="0 0 10 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
+        <path d="M5 0L0 5.2851L1.14658 6.47387L4.19313 3.2536L4.19313 12H5.80687V3.2536L8.85342 6.47387L10 5.2851L5 0Z" fill="currentColor" />
+      </svg>
+    </span>
   );
 }

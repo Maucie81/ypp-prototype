@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { Icon } from "@yahoo/uds";
 import { ChevronRight, Info } from "@yahoo/uds-icons";
@@ -18,13 +18,6 @@ export interface VideoSeriesData {
   completion: number[];
 }
 
-interface ClickTip {
-  x: number;
-  y: number;
-  date: string;
-  value: number;
-}
-
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 
 const TABS: { key: VideoMetric; label: string }[] = [
@@ -39,33 +32,23 @@ const TABS: { key: VideoMetric; label: string }[] = [
 
 export function VideoCard({ data }: { data: VideoSeriesData }) {
   const [activeTab, setActiveTab] = useState<VideoMetric>("streams");
-  const [clickTip, setClickTip] = useState<ClickTip | null>(null);
 
   const seriesData = data[activeTab];
 
-  useEffect(() => {
-    const handleMouseDown = () => setClickTip(null);
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => document.removeEventListener("mousedown", handleMouseDown);
-  }, []);
-
-  const handleChartClick = (params: {
-    name: string;
-    data: number;
-    event: { event: { offsetX: number; offsetY: number } };
-  }) => {
-    if (params.name == null || params.data == null) return;
-    setClickTip({
-      x: params.event.event.offsetX,
-      y: params.event.event.offsetY,
-      date: params.name,
-      value: typeof params.data === "number" ? params.data : Number(params.data),
-    });
-  };
-
   const option = {
     animation: false,
-    tooltip: { show: false },
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: "#232a31",
+      borderColor: "#232a31",
+      borderWidth: 0,
+      padding: [6, 10],
+      textStyle: {
+        color: "#fff",
+        fontSize: 12,
+        fontFamily: "Yahoo_Product_Sans_VF, sans-serif",
+      },
+    },
     grid: { left: 44, right: 16, top: 12, bottom: 40 },
     xAxis: {
       type: "category",
@@ -146,7 +129,7 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
             <button
               key={tab.key}
               type="button"
-              onClick={() => { setActiveTab(tab.key); setClickTip(null); }}
+              onClick={() => setActiveTab(tab.key)}
               className={`relative shrink-0 py-3 font-yahoo-product-sans text-[14px] leading-5 focus-visible:outline-none ${
                 activeTab === tab.key
                   ? "font-medium text-[#232a31]"
@@ -164,43 +147,15 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
 
       {/* Chart */}
       <div className="relative mt-2">
-        <div
-          className="w-full"
-          style={{ height: 280 }}
-          onMouseLeave={() => setClickTip(null)}
-        >
+        <div className="w-full" style={{ height: 280 }}>
           <ReactECharts
             key={activeTab}
             option={option}
             style={{ height: 280, width: "100%" }}
             opts={{ renderer: "canvas" }}
             notMerge
-            onEvents={{ click: handleChartClick }}
           />
         </div>
-
-        {/* Click tooltip — "Featured in the NTK" speech bubble */}
-        {clickTip && (
-          <div
-            className="pointer-events-none absolute z-20 flex flex-col items-center"
-            style={{
-              left: `${clickTip.x}px`,
-              top: `${clickTip.y}px`,
-              transform: "translate(-50%, calc(-100% - 14px))",
-            }}
-          >
-            <div className="rounded-[8px] bg-[#232a31] px-4 py-3 text-white shadow-lg">
-              <p className="font-yahoo-product-sans text-[14px] font-semibold leading-5 whitespace-nowrap">
-                {clickTip.date}
-              </p>
-              <p className="font-yahoo-product-sans text-[12px] leading-4 text-white/70 mt-0.5 whitespace-nowrap">
-                {clickTip.value.toLocaleString("en-US")}
-              </p>
-            </div>
-            {/* Arrow */}
-            <div className="h-0 w-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-[#232a31]" />
-          </div>
-        )}
       </div>
     </section>
   );
