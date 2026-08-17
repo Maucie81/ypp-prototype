@@ -52,7 +52,7 @@ function getKpiContentPerformanceHref(id: KpiId): string {
 
 export default function OverviewPage() {
   const { range } = useTimeFilter();
-  const { brandId } = useBrand();
+  const { brandId, isSwitching } = useBrand();
   const rangePreset: DateRangePreset = range;
 
   const primaryKpis = useMemo(
@@ -92,20 +92,33 @@ export default function OverviewPage() {
       {/* KPI cards */}
       <section>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {[...primaryKpis, ...secondaryKpis].map((kpi) => (
-            <KpiCard
-              key={kpi.id}
-              variant="secondary"
-              label={kpi.label}
-              value={kpi.value}
-              delta={kpi.delta}
-              trend={kpi.trend}
-              helperText={kpi.helperText}
-              href={getKpiContentPerformanceHref(kpi.id)}
-              comparisonDate={kpi.comparisonDate}
-              icon={kpiIconMap[kpi.id]}
-            />
-          ))}
+          {isSwitching
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-5 py-4 flex flex-col gap-4 animate-pulse"
+                >
+                  <div className="h-8 flex items-center border-b border-[#e0e4e9] pb-2 gap-2">
+                    <div className="h-4 w-4 rounded bg-[#e0e4e9] shrink-0" />
+                    <div className="h-3.5 w-24 rounded bg-[#e0e4e9]" />
+                  </div>
+                  <div className="h-7 w-28 rounded bg-[#e0e4e9]" />
+                </div>
+              ))
+            : [...primaryKpis, ...secondaryKpis].map((kpi) => (
+                <KpiCard
+                  key={kpi.id}
+                  variant="secondary"
+                  label={kpi.label}
+                  value={kpi.value}
+                  delta={kpi.delta}
+                  trend={kpi.trend}
+                  helperText={kpi.helperText}
+                  href={getKpiContentPerformanceHref(kpi.id)}
+                  comparisonDate={kpi.comparisonDate}
+                  icon={kpiIconMap[kpi.id]}
+                />
+              ))}
         </div>
       </section>
 
