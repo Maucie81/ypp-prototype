@@ -142,7 +142,7 @@ export function KpiCard({
               </p>
               <InfoTooltip label={label} helperText={helperText ?? ""} />
             </div>
-            <Icon name={ChevronRight} size="sm" variant="outline" className="h-[16px] w-[16px] shrink-0 text-[#6a6a6a]" />
+            <Icon name={ChevronRight} size="sm" variant="outline" className="h-3.5 w-3.5 shrink-0 text-[#6a6a6a]" />
           </div>
           <div className="flex items-end gap-2">
             <p className="font-yahoo-product-sans text-[24px] font-bold leading-[1] text-[#232a31]">
@@ -187,7 +187,7 @@ export function KpiCard({
           </p>
           <InfoTooltip label={label} helperText={helperText ?? ""} />
         </div>
-        <Icon name={ChevronRight} size="sm" variant="outline" className="h-[16px] w-[16px] shrink-0 text-[#6a6a6a] ml-2" />
+        <Icon name={ChevronRight} size="sm" variant="outline" className="h-3.5 w-3.5 shrink-0 text-[#6a6a6a] ml-2" />
       </div>
 
       {/* Data rows */}

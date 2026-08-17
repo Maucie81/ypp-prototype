@@ -33,7 +33,7 @@ export function FilterChip({
     <div
       className={`inline-flex h-9 items-center rounded-full border px-4 py-2 ${
         isApplied || hasCount
-          ? "gap-1 border-[#2c363f] bg-[#f5f8fa] hover:bg-[#f0f3f5] active:bg-[#e0e4e9]"
+          ? "gap-1 border-[#2c363f] bg-white hover:bg-[#f0f3f5] active:bg-[#e0e4e9]"
           : "gap-2 border-[#e0e4e9] bg-white hover:bg-[#f5f8fa] active:bg-[#e0e4e9]"
       }`}
     >
