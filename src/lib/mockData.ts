@@ -1665,10 +1665,12 @@ export function getSampleContentItem(seed: string): ContentModalItem {
   const min = String(d.getMinutes()).padStart(2, "0");
   const ampm = d.getHours() >= 12 ? "PM" : "AM";
 
+  const description = faker.helpers.arrayElement(FEED_ITEM_DESCS);
   const item: ContentModalItem = {
     id: `sample-${seed}`,
     title: faker.helpers.arrayElement(FEED_ITEM_TITLES),
-    description: faker.helpers.arrayElement(FEED_ITEM_DESCS),
+    description,
+    snippet: description,
     contentType: faker.helpers.arrayElement(["video", "article", "slideshow"] as const),
     thumbnailSeed: faker.number.int({ min: 100, max: 999 }),
     publishedAt: `${mon} ${d.getDate()}, ${d.getFullYear()} at ${h}:${min} ${ampm} PT`,

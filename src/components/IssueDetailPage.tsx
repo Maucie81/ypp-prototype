@@ -351,10 +351,11 @@ export function IssueDetailPage({
               key={item.id}
               item={item}
               badgeVariant={contentBadgeVariant}
-              onRowClick={(i) => setContentModal(i)}
+              onRowClick={(i) => setContentModal({ ...i, snippet: i.description })}
               onBadgeClick={(i) => {
-                if (type === "warning") setWarnModal(i);
-                else setFailModal(i);
+                const modalItem = { ...i, snippet: i.description };
+                if (type === "warning") setWarnModal(modalItem);
+                else setFailModal(modalItem);
               }}
             />
           ))}

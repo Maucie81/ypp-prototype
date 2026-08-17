@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@yahoo/uds";
-import { Article } from "@yahoo/uds-icons";
+import { Article, VideoCamera, ImageGallery } from "@yahoo/uds-icons";
 import { BrandIcon } from "@/components/BrandIcon";
 import { DeltaArrowIcon } from "@/components/DeltaArrowIcon";
 import { ContentDetailsModal } from "@/components/ContentDetailsModal";
@@ -35,6 +35,25 @@ const COLGROUP = (
     <col className="w-[12%]" />
   </colgroup>
 );
+
+/** Collapses the row's content type into the 3 buckets ContentDetailsModal understands. */
+function modalContentType(contentType: string): "video" | "slideshow" | "article" {
+  const lower = contentType.toLowerCase();
+  if (lower === "video" || lower === "live") return "video";
+  if (lower === "slideshow" || lower === "gallery") return "slideshow";
+  return "article";
+}
+
+function contentTypeIcon(contentType: string) {
+  switch (modalContentType(contentType)) {
+    case "video":
+      return VideoCamera;
+    case "slideshow":
+      return ImageGallery;
+    default:
+      return Article;
+  }
+}
 
 function alignClass(align: "left" | "center" | "right") {
   return align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
@@ -123,10 +142,11 @@ export function TopContentTable({
       <td className="h-[56px] w-0 border-b border-[#f0f3f5] px-3 py-4 text-left align-middle">
         <div className="flex min-w-0 items-center gap-3">
           <Icon
-            name={Article}
+            name={contentTypeIcon(row.contentType)}
             size="sm"
             variant="outline"
-            className="h-4 w-4 shrink-0 text-[#464e56]"
+            className="h-4 w-4 shrink-0"
+            style={{ color: "#464E56" }}
             aria-hidden
           />
           <button
@@ -136,13 +156,13 @@ export function TopContentTable({
                 title: row.contentTitle,
                 description: `Published on ${new Date().toLocaleDateString()}`,
                 snippet: "During Thursday's interview with CNN, Vice President Kamala Harris reiterated her support for a bipartisan Senate bill that would have overhauled the country's immigration system in an effort to cut down on the number of undocumented migr...",
-                contentType: row.contentType === "video" ? "video" : row.contentType === "slideshow" ? "slideshow" : "article",
+                contentType: modalContentType(row.contentType),
                 thumbnailSeed: row.rank,
                 publishedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
                 status: "Published",
               });
             }}
-            className="min-w-0 flex-1 truncate text-left font-yahoo-product-sans text-[14px] leading-5 underline text-[#6e7780] hover:text-[#232a31] cursor-pointer"
+            className="min-w-0 flex-1 truncate text-left font-yahoo-product-sans text-[14px] leading-5 underline text-[#232a31] cursor-pointer"
             title={row.contentTitle}
           >
             {row.contentTitle}

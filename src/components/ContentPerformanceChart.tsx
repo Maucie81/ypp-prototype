@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import ReactECharts from "echarts-for-react";
 
-interface ClickTip {
+interface HoverTip {
   x: number;
   y: number;
   date: string;
   value: number;
 }
+
+const GRID_LEFT = 44;
+const GRID_RIGHT = 16;
+const GRID_TOP = 12;
+const GRID_BOTTOM = 32;
+const CHART_HEIGHT = 280;
 
 export function ContentPerformanceChart({
   xLabels,
@@ -17,26 +23,39 @@ export function ContentPerformanceChart({
   xLabels: string[];
   values: number[];
 }) {
-  const [clickTip, setClickTip] = useState<ClickTip | null>(null);
+  const [clickTip, setClickTip] = useState<HoverTip | null>(null);
+  const chartRef = useRef<ReactECharts | null>(null);
+  const lastIndex = useRef<number | null>(null);
 
-  useEffect(() => {
-    const handleMouseDown = () => setClickTip(null);
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => document.removeEventListener("mousedown", handleMouseDown);
-  }, []);
+  const handlePointerMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const plotWidth = rect.width - GRID_LEFT - GRID_RIGHT;
+    const fraction = (e.clientX - rect.left - GRID_LEFT) / plotWidth;
+    const clamped = Math.min(1, Math.max(0, fraction));
+    const index = Math.round(clamped * (xLabels.length - 1));
 
-  const handleChartClick = (params: {
-    name: string;
-    data: number;
-    event: { event: { offsetX: number; offsetY: number } };
-  }) => {
-    if (params.name == null || params.data == null) return;
-    setClickTip({
-      x: params.event.event.offsetX,
-      y: params.event.event.offsetY,
-      date: params.name,
-      value: typeof params.data === "number" ? params.data : Number(params.data),
-    });
+    const previousIndex = lastIndex.current;
+    if (index === previousIndex) return;
+    lastIndex.current = index;
+
+    const value = values[index];
+    const xLocal = GRID_LEFT + (index / (xLabels.length - 1)) * plotWidth;
+    const plotHeight = CHART_HEIGHT - GRID_TOP - GRID_BOTTOM;
+    const yLocal = GRID_TOP + (1 - value / 100) * plotHeight;
+
+    setClickTip({ x: xLocal, y: yLocal, date: xLabels[index], value });
+
+    const instance = chartRef.current?.getEchartsInstance();
+    if (previousIndex !== null) {
+      instance?.dispatchAction({ type: "downplay", seriesIndex: 0, dataIndex: previousIndex });
+    }
+    instance?.dispatchAction({ type: "highlight", seriesIndex: 0, dataIndex: index });
+  };
+
+  const handlePointerLeave = () => {
+    lastIndex.current = null;
+    setClickTip(null);
+    chartRef.current?.getEchartsInstance().dispatchAction({ type: "downplay", seriesIndex: 0 });
   };
 
   const option = {
@@ -111,18 +130,19 @@ export function ContentPerformanceChart({
           <div
             className="w-full min-w-0"
             style={{ height: 280 }}
-            onMouseLeave={() => setClickTip(null)}
+            onMouseMove={handlePointerMove}
+            onMouseLeave={handlePointerLeave}
           >
             <ReactECharts
+              ref={chartRef}
               option={option}
               style={{ height: 280, width: "100%", minWidth: 0 }}
               opts={{ renderer: "canvas" }}
               notMerge
-              onEvents={{ click: handleChartClick }}
             />
           </div>
 
-          {/* Click tooltip — "Featured in the NTK" speech bubble */}
+          {/* Hover tooltip — "Featured in the NTK" speech bubble */}
           {clickTip && (
             <div
               className="pointer-events-none absolute z-20 flex flex-col items-center"

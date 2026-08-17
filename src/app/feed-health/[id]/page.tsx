@@ -502,11 +502,11 @@ export default function FeedHealthDetailPage({
             <RecentItemRow
               key={item.id}
               item={item}
-              onRowClick={(i) => openContentModal(i)}
+              onRowClick={(i) => openContentModal({ ...i, snippet: i.description })}
               onBadgeClick={(i) => {
                 const type =
                   i.status === "Published with warning" ? "warning" : "failure";
-                openIssueModal(i, type);
+                openIssueModal({ ...i, snippet: i.description }, type);
               }}
             />
           ))}
