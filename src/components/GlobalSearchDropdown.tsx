@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Icon } from "@yahoo/uds";
 import { Article, VideoCamera, ImageGallery } from "@yahoo/uds-icons";
 import { PublishStatusLabel, type PublishStatusLabelVariant } from "@/components/PublishStatusLabel";
@@ -130,15 +129,6 @@ export function GlobalSearchDropdown({
         </div>
       )}
 
-      {/* View all footer — only for the recently-published (empty query) state */}
-      {phase === "recent" && (
-        <Link
-          href="/kpi/top-content"
-          className="flex shrink-0 items-center justify-center border-t border-[#f5f5f5] py-3 font-yahoo-product-sans text-[14px] font-medium text-[#5D5EFF] transition-colors hover:bg-[#f5f8fa]"
-        >
-          View all content
-        </Link>
-      )}
     </div>
   );
 }
