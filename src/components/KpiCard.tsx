@@ -128,7 +128,7 @@ export function KpiCard({
 
   if (isPrimary) {
     const cardClassName =
-      "relative flex min-h-[112px] flex-col items-stretch rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] p-6";
+      "relative flex min-h-[112px] flex-col items-stretch rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] p-6 transition-colors duration-150 hover:bg-[#f0f3f5] hover:border-[#cdd3da] cursor-pointer";
     const content = (
       <div className="flex flex-col gap-0 h-full">
         <div className="flex min-w-0 flex-col gap-4 pb-4">
@@ -173,7 +173,7 @@ export function KpiCard({
 
   // Secondary variant — Figma: Secondary Chip_Small
   const cardClassName =
-    "relative flex flex-col rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-5 py-4";
+    "relative flex flex-col rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-5 py-4 transition-colors duration-150 hover:bg-[#f0f3f5] hover:border-[#cdd3da] cursor-pointer";
   const content = (
     <div className="flex flex-col gap-4">
       {/* Header row: icon + label + info + chevron */}
