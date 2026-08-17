@@ -157,7 +157,7 @@ export function ContentPerformanceDetail() {
                   {label}
                   <span
                     className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
-                      isActive ? "bg-[#7d2eff]" : "bg-transparent"
+                      isActive ? "bg-[#5D5EFF]" : "bg-transparent"
                     }`}
                     aria-hidden
                   />

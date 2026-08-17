@@ -440,7 +440,7 @@ function CustomDateRangePopover({
           type="button"
           className={`min-w-[104px] rounded-full px-4 py-1.5 font-yahoo-product-sans text-[14px] font-medium leading-5 ${
             canSave
-              ? "bg-[#7d2eff] text-white hover:bg-[#6b22e8]"
+              ? "bg-[#5D5EFF] text-white hover:bg-[#4A4BE8]"
               : "cursor-not-allowed bg-[#f0f3f5] text-[#98a2b3]"
           }`}
           disabled={!canSave}

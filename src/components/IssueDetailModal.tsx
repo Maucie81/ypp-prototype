@@ -208,7 +208,7 @@ function FooterRow({
       className={`flex items-center justify-end pt-6 ${borderTop ? "border-t border-[#f0f3f5]" : ""}`}
     >
       {footerType === "button" ? (
-        <button className="rounded-full bg-[#7d2eff] px-5 py-2 font-yahoo-product-sans text-[14px] font-bold leading-5 text-white transition-colors hover:bg-[#6b1fe8]">
+        <button className="rounded-full bg-[#5D5EFF] px-5 py-2 font-yahoo-product-sans text-[14px] font-bold leading-5 text-white transition-colors hover:bg-[#4A4BE8]">
           View documentation
         </button>
       ) : (
@@ -346,7 +346,7 @@ function AccordionItem({
       {isExpanded && footerType !== "none" && (
         <div className="flex items-center justify-end border-b border-[#f0f3f5] pb-6 pt-4">
           {footerType === "button" ? (
-            <button className="rounded-full bg-[#7d2eff] px-5 py-2 font-yahoo-product-sans text-[14px] font-bold leading-5 text-white transition-colors hover:bg-[#6b1fe8]">
+            <button className="rounded-full bg-[#5D5EFF] px-5 py-2 font-yahoo-product-sans text-[14px] font-bold leading-5 text-white transition-colors hover:bg-[#4A4BE8]">
               View documentation
             </button>
           ) : (
@@ -390,7 +390,7 @@ function MetadataRow({ item }: { item: ContentModalItem }) {
                 href={field.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#7d2eff] underline"
+                className="text-[#5D5EFF] underline"
               >
                 {field.label}
               </a>

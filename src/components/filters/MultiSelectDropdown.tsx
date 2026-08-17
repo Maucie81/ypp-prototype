@@ -131,7 +131,7 @@ export function MultiSelectDropdown({
               </button>
               <button
                 type="button"
-                className="rounded-full bg-[#7d2eff] px-5 py-2 font-yahoo-product-sans text-[14px] font-medium leading-5 text-white hover:bg-[#6b22e8]"
+                className="rounded-full bg-[#5D5EFF] px-5 py-2 font-yahoo-product-sans text-[14px] font-medium leading-5 text-white hover:bg-[#4A4BE8]"
                 onClick={() => onOpenChange(false)}
               >
                 Done

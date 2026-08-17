@@ -92,7 +92,7 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
       <div className="flex shrink-0 items-center gap-4 pr-12">
         <button
           type="button"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-[#f0f3f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7d2eff] focus-visible:ring-offset-2"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-[#f0f3f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5D5EFF] focus-visible:ring-offset-2"
           aria-label={sidebarCollapsed ? "Expand menu" : "Collapse menu"}
           onClick={onToggleSidebar}
         >
@@ -101,10 +101,10 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
 
         <Link
           href="/"
-          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7d2eff] focus-visible:ring-offset-2"
+          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5D5EFF] focus-visible:ring-offset-2"
           aria-label="Partner Portal home"
         >
-          <span className="whitespace-nowrap font-yahoo-product-sans text-[21px] font-bold leading-5 tracking-[-0.04em] text-[#6155F5]">
+          <span className="whitespace-nowrap font-yahoo-product-sans text-[21px] font-bold leading-5 tracking-[-0.04em] text-[#5D5EFF]">
             partner portal
           </span>
         </Link>
@@ -160,7 +160,7 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
             ) : (
               <button
                 type="button"
-                className="flex size-9 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7d2eff] focus-visible:ring-offset-2"
+                className="flex size-9 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5D5EFF] focus-visible:ring-offset-2"
                 aria-label="Open search"
                 onClick={() => setSearchOpen(true)}
               >
@@ -197,7 +197,7 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
         <div ref={profileRef} className="relative">
           <button
             type="button"
-            className="flex size-9 items-center justify-center rounded-full bg-[#7d2eff] font-yahoo-product-sans text-[13px] font-medium leading-4 text-white hover:bg-[#6a20e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7d2eff] focus-visible:ring-offset-2"
+            className="flex size-9 items-center justify-center rounded-full bg-[#5D5EFF] font-yahoo-product-sans text-[13px] font-medium leading-4 text-white hover:bg-[#4a4be8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5D5EFF] focus-visible:ring-offset-2"
             aria-haspopup="menu"
             aria-expanded={profileOpen}
             onClick={() => setProfileOpen((v) => !v)}
@@ -214,7 +214,7 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
               {/* Profile header */}
               <div className="px-4 pb-0 pt-2">
                 <div className="flex items-center gap-4 pb-4 pt-5">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#7d2eff]">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#5D5EFF]">
                     <span className="font-yahoo-product-sans text-[13px] font-medium leading-4 text-white">
                       JF
                     </span>

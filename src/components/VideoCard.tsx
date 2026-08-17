@@ -101,7 +101,7 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
           showSymbol: true,
           symbolSize: 6,
           itemStyle: {
-            color: "#7d2eff",
+            color: "#5D5EFF",
             borderColor: "rgba(125, 46, 255, 0.28)",
             borderWidth: 10,
           },
@@ -143,7 +143,7 @@ export function VideoCard({ data }: { data: VideoSeriesData }) {
               {tab.label}
               <span
                 className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
-                  activeTab === tab.key ? "bg-[#6155F5]" : "bg-transparent"
+                  activeTab === tab.key ? "bg-[#5D5EFF]" : "bg-transparent"
                 }`}
                 aria-hidden
               />

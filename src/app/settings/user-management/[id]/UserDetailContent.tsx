@@ -200,7 +200,7 @@ export function UserDetailContent({ id }: { id: string }) {
             </span>
             <button
               type="button"
-              className="absolute -bottom-0.5 -right-0.5 flex size-7 items-center justify-center rounded-full bg-[#7d2eff] text-white hover:bg-[#6b26e6]"
+              className="absolute -bottom-0.5 -right-0.5 flex size-7 items-center justify-center rounded-full bg-[#5D5EFF] text-white hover:bg-[#4A4BE8]"
               aria-label="Profile settings"
             >
               <Icon name={Cog} size="sm" variant="outline" className="size-4 text-white" />
@@ -238,7 +238,7 @@ export function UserDetailContent({ id }: { id: string }) {
             Profile
             <span
               className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
-                activeTab === "profile" ? "bg-[#7d2eff]" : "bg-transparent"
+                activeTab === "profile" ? "bg-[#5D5EFF]" : "bg-transparent"
               }`}
               aria-hidden
             />
@@ -255,7 +255,7 @@ export function UserDetailContent({ id }: { id: string }) {
             Notifications
             <span
               className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
-                activeTab === "notifications" ? "bg-[#7d2eff]" : "bg-transparent"
+                activeTab === "notifications" ? "bg-[#5D5EFF]" : "bg-transparent"
               }`}
               aria-hidden
             />
@@ -273,7 +273,7 @@ export function UserDetailContent({ id }: { id: string }) {
               <input
                 type="email"
                 defaultValue={user.email}
-                className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#7d2eff] focus:outline-none focus:ring-1 focus:ring-[#7d2eff]"
+                className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
               />
             </div>
             <div className="grid grid-cols-2 gap-6">
@@ -284,7 +284,7 @@ export function UserDetailContent({ id }: { id: string }) {
                 <input
                   type="text"
                   defaultValue={user.firstName}
-                  className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#7d2eff] focus:outline-none focus:ring-1 focus:ring-[#7d2eff]"
+                  className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
                 />
               </div>
               <div>
@@ -294,7 +294,7 @@ export function UserDetailContent({ id }: { id: string }) {
                 <input
                   type="text"
                   defaultValue={user.lastName}
-                  className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#7d2eff] focus:outline-none focus:ring-1 focus:ring-[#7d2eff]"
+                  className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
                 />
               </div>
             </div>
@@ -336,7 +336,7 @@ export function UserDetailContent({ id }: { id: string }) {
                           </span>
                         </div>
                         {selectedRole === r.id && (
-                          <Icon name={Check} size="sm" variant="outline" className="shrink-0 text-[#7d2eff]" />
+                          <Icon name={Check} size="sm" variant="outline" className="shrink-0 text-[#5D5EFF]" />
                         )}
                       </button>
                     ))}
@@ -429,7 +429,7 @@ export function UserDetailContent({ id }: { id: string }) {
                             )}
                           </div>
                           {isSelected && (
-                            <Icon name={Check} size="sm" variant="outline" className="shrink-0 text-[#7d2eff]" />
+                            <Icon name={Check} size="sm" variant="outline" className="shrink-0 text-[#5D5EFF]" />
                           )}
                         </button>
                       );
@@ -456,7 +456,7 @@ export function UserDetailContent({ id }: { id: string }) {
             </button>
             <button
               type="button"
-              className="h-9 rounded-full bg-[#7d2eff] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-white hover:bg-[#6b26e6]"
+              className="h-9 rounded-full bg-[#5D5EFF] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-white hover:bg-[#4A4BE8]"
             >
               Save changes
             </button>
@@ -669,7 +669,7 @@ export function UserDetailContent({ id }: { id: string }) {
                         rows={3}
                         value={internalNotes[section.id] ?? ""}
                         onChange={(e) => handleInternalNoteChange(section.id, e.target.value)}
-                        className="w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 py-2 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] placeholder:text-[#828a93] focus:border-[#7d2eff] focus:outline-none focus:ring-1 focus:ring-[#7d2eff]"
+                        className="w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 py-2 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] placeholder:text-[#828a93] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
                       />
                     </div>
                   </div>
@@ -691,7 +691,7 @@ export function UserDetailContent({ id }: { id: string }) {
               disabled={!notificationsDirty}
               className={`h-9 rounded-full px-4 py-2 font-yahoo-product-sans text-[14px] font-medium ${
                 notificationsDirty
-                  ? "bg-[#7d2eff] text-white hover:bg-[#6b26e6]"
+                  ? "bg-[#5D5EFF] text-white hover:bg-[#4A4BE8]"
                   : "cursor-not-allowed bg-[#e0e4e9] text-[#828a93]"
               }`}
             >

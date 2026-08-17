@@ -80,7 +80,7 @@ export function ContentPerformanceChart({
           showSymbol: true,
           symbolSize: 6,
           itemStyle: {
-            color: "#7d2eff",
+            color: "#5D5EFF",
             borderColor: "rgba(125, 46, 255, 0.28)",
             borderWidth: 10,
           },

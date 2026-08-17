@@ -36,7 +36,7 @@ export function DownloadButton() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={open ? undefined : "Download"}
-        className={`inline-flex items-center justify-center rounded-full border border-[#e0e4e9] bg-white transition-all duration-200 ease-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7d2eff] focus-visible:ring-offset-2 ${
+        className={`inline-flex items-center justify-center rounded-full border border-[#e0e4e9] bg-white transition-all duration-200 ease-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5D5EFF] focus-visible:ring-offset-2 ${
           open ? "h-8 pl-3 pr-3.5" : "size-8"
         }`}
       >

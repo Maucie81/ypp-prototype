@@ -129,7 +129,7 @@ function ModalCard({
           showSymbol: true,
           symbolSize: 6,
           itemStyle: {
-            color: "#7d2eff",
+            color: "#5D5EFF",
             borderColor: "rgba(125,46,255,0.28)",
             borderWidth: 10,
           },
@@ -250,7 +250,7 @@ function ModalCard({
                     href={field.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#7d2eff] underline"
+                    className="text-[#5D5EFF] underline"
                   >
                     {field.label}
                   </a>
@@ -301,7 +301,7 @@ function ModalCard({
                   </span>
                   <span
                     className={`absolute bottom-0 left-0 h-1 w-full rounded-full ${
-                      activeTab === tab ? "bg-[#7d2eff]" : "bg-transparent"
+                      activeTab === tab ? "bg-[#5D5EFF]" : "bg-transparent"
                     }`}
                     aria-hidden
                   />

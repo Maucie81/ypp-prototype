@@ -143,7 +143,7 @@ export function DeleteContentDialog({
               disabled={!reason}
               onClick={handleConfirm}
               className={`rounded-full px-5 py-2 font-yahoo-product-sans text-[14px] font-medium text-white transition-colors ${
-                reason ? "bg-[#7d2eff] hover:bg-[#6b22e8]" : "cursor-not-allowed bg-[#7d2eff] opacity-30"
+                reason ? "bg-[#5D5EFF] hover:bg-[#4A4BE8]" : "cursor-not-allowed bg-[#5D5EFF] opacity-30"
               }`}
             >
               Delete

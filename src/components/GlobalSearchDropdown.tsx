@@ -61,7 +61,7 @@ function ResultRow({
 function Spinner() {
   return (
     <div
-      className="size-10 shrink-0 animate-spin rounded-full border-[3px] border-[#e0e4e9] border-t-[#7d2eff]"
+      className="size-10 shrink-0 animate-spin rounded-full border-[3px] border-[#e0e4e9] border-t-[#5D5EFF]"
       aria-hidden
     />
   );
@@ -122,7 +122,7 @@ export function GlobalSearchDropdown({
       {phase === "recent" && (
         <Link
           href="/kpi/top-content"
-          className="flex shrink-0 items-center justify-center border-t border-[#f5f5f5] py-3 font-yahoo-product-sans text-[14px] font-medium text-[#7d2eff] transition-colors hover:bg-[#f5f8fa]"
+          className="flex shrink-0 items-center justify-center border-t border-[#f5f5f5] py-3 font-yahoo-product-sans text-[14px] font-medium text-[#5D5EFF] transition-colors hover:bg-[#f5f8fa]"
         >
           View all content
         </Link>

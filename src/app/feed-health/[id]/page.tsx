@@ -426,7 +426,7 @@ export default function FeedHealthDetailPage({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-yahoo-product-sans text-[13px] leading-5 text-[#464e56]">
             <span>Source ID: {feed.id}</span>
             <span className="text-[#c8cdd2]" aria-hidden>|</span>
-            <a href="#" className="font-medium text-[#7d2eff] underline hover:text-[#6b1fe8]">Feed source URL</a>
+            <a href="#" className="font-medium text-[#5D5EFF] underline hover:text-[#4A4BE8]">Feed source URL</a>
             <span className="text-[#c8cdd2]" aria-hidden>|</span>
             <span>Partner brand: {feed.brand}</span>
           </div>

@@ -25,7 +25,7 @@ export default function UserManagementPage() {
         actions={
           <button
             type="button"
-            className="h-9 rounded-full bg-[#7d2eff] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-white hover:bg-[#6b26e6]"
+            className="h-9 rounded-full bg-[#5D5EFF] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-white hover:bg-[#4A4BE8]"
           >
             Add user
           </button>
@@ -42,7 +42,7 @@ export default function UserManagementPage() {
             <input
               type="search"
               placeholder="Search by keyword"
-              className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white py-2 pl-9 pr-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] placeholder:text-[#828a93] focus:border-[#7d2eff] focus:outline-none focus:ring-1 focus:ring-[#7d2eff]"
+              className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white py-2 pl-9 pr-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] placeholder:text-[#828a93] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
             />
           </div>
           <button
