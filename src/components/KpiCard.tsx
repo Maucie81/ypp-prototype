@@ -173,7 +173,7 @@ export function KpiCard({
 
   // Secondary variant — Figma: Secondary Chip_Small
   const cardClassName =
-    "relative flex flex-col rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-6 py-4";
+    "relative flex flex-col rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-5 py-4";
   const content = (
     <div className="flex flex-col gap-4">
       {/* Header row: icon + label + info + chevron */}

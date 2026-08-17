@@ -65,7 +65,11 @@ function ModalCard({
   const thumbUrl = `https://picsum.photos/seed/${item.thumbnailSeed}/163/104`;
 
   const chartOption = {
-    animation: false,
+    animation: true,
+    animationDuration: 450,
+    animationEasing: "cubicOut" as const,
+    animationDurationUpdate: 450,
+    animationEasingUpdate: "cubicOut" as const,
     grid: { left: 48, right: 12, top: 16, bottom: 32 },
     xAxis: {
       type: "category",
@@ -317,11 +321,10 @@ function ModalCard({
 
           {/* Line chart */}
           <ReactECharts
-            key={activeTab}
             option={chartOption}
             style={{ height: 280, width: "100%" }}
             opts={{ renderer: "canvas" }}
-            notMerge
+            notMerge={false}
           />
         </div>
       </div>
