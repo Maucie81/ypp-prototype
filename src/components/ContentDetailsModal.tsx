@@ -3,13 +3,14 @@
 import { useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { Icon } from "@yahoo/uds";
-import { Article, VideoCamera, ImageGallery, Cross, Download } from "@yahoo/uds-icons";
+import { Article, VideoCamera, ImageGallery, Cross } from "@yahoo/uds-icons";
 import { Modal } from "@/components/ui/Modal";
 import { FilterChip } from "@/components/FilterChip";
 import { DateFilter, dateChipLabel, type DateFilterValue } from "@/components/filters/DateFilter";
 import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
 import { OPTIONS } from "@/components/filters/FilterBar";
 import { DeleteContentDialog } from "@/components/DeleteContentDialog";
+import { DownloadButton } from "@/components/DownloadButton";
 import { PublishStatusLabel, type PublishStatusLabelVariant } from "@/components/PublishStatusLabel";
 import {
   getContentMetadata,
@@ -376,9 +377,7 @@ function ModalCard({
                 </button>
               ))}
             </div>
-            <button className="flex size-8 shrink-0 items-center justify-center rounded-full border border-[#e0e4e9] bg-white transition-colors hover:bg-[#f5f8fa]">
-              <Icon name={Download} size="sm" variant="outline" className="size-4 text-[#6a6a6a]" />
-            </button>
+            <DownloadButton />
           </div>
 
           {/* Line chart */}
