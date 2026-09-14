@@ -7,7 +7,7 @@ import { useOnClickOutside } from "@/lib/useOnClickOutside";
 
 export type PresetId = "last30" | "last14" | "last7" | "last24h" | "mtd" | "custom";
 
-function presetLabel(preset: PresetId) {
+export function presetLabel(preset: PresetId) {
   switch (preset) {
     case "last30":
       return "Last 30 days";
@@ -36,6 +36,11 @@ export type DateFilterValue =
       timeHHMM: string; // 24h, applies to both start/end
       timezone: string;
     };
+
+export function dateChipLabel(value: DateFilterValue) {
+  if (value.mode === "preset") return presetLabel(value.preset);
+  return `${value.startISO} – ${value.endISO}`;
+}
 
 function todayISO() {
   const d = new Date();

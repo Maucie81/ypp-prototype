@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { FilterChip } from "@/components/FilterChip";
-import { DateFilter, type DateFilterValue } from "@/components/filters/DateFilter";
+import { DateFilter, dateChipLabel } from "@/components/filters/DateFilter";
 import {
   MultiSelectDropdown,
   type MultiSelectOption,
@@ -20,7 +20,7 @@ type MultiFilterKey =
   | "devices"
   | "granularity";
 
-const OPTIONS: Record<MultiFilterKey, MultiSelectOption[]> = {
+export const OPTIONS: Record<MultiFilterKey, MultiSelectOption[]> = {
   brands: [
     { id: "usa-today", label: "USA TODAY" },
     { id: "az-central", label: "azcentral" },
@@ -62,27 +62,6 @@ const OPTIONS: Record<MultiFilterKey, MultiSelectOption[]> = {
     { id: "monthly", label: "Monthly" },
   ],
 };
-
-function presetLabel(preset: "last30" | "last14" | "last7" | "last24h" | "mtd") {
-  switch (preset) {
-    case "last30":
-      return "Last 30 days";
-    case "last14":
-      return "Last 14 days";
-    case "last7":
-      return "Last 7 days";
-    case "last24h":
-      return "Last 24 hours";
-    case "mtd":
-      return "Month to date";
-  }
-}
-
-function dateChipLabel(value: DateFilterValue) {
-  if (value.mode === "preset") return presetLabel(value.preset);
-  return `${value.startISO} – ${value.endISO}`;
-}
-
 
 export function FilterBar({ variant }: { variant: FilterBarVariant }) {
   const [openKey, setOpenKey] = useState<string | null>(null);

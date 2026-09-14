@@ -6,6 +6,9 @@ import { Icon } from "@yahoo/uds";
 import { Article, VideoCamera, ImageGallery, Cross, Download } from "@yahoo/uds-icons";
 import { Modal } from "@/components/ui/Modal";
 import { FilterChip } from "@/components/FilterChip";
+import { DateFilter, dateChipLabel, type DateFilterValue } from "@/components/filters/DateFilter";
+import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
+import { OPTIONS } from "@/components/filters/FilterBar";
 import { DeleteContentDialog } from "@/components/DeleteContentDialog";
 import { PublishStatusLabel, type PublishStatusLabelVariant } from "@/components/PublishStatusLabel";
 import {
@@ -62,6 +65,18 @@ function ModalCard({
   const meta = getContentMetadata(item.id);
   const [activeTab, setActiveTab] = useState<ContentPerfTab>("Views");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const [openFilterKey, setOpenFilterKey] = useState<"date" | "regions" | "devices" | null>(null);
+  const [dateValue, setDateValue] = useState<DateFilterValue>({ mode: "preset", preset: "last7" });
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
+
+  function toggleInArray(arr: string[], id: string): string[] {
+    const set = new Set(arr);
+    if (set.has(id)) set.delete(id);
+    else set.add(id);
+    return Array.from(set);
+  }
 
   const thumbUrl = `https://picsum.photos/seed/${item.thumbnailSeed}/163/104`;
 
@@ -234,10 +249,63 @@ function ModalCard({
         <div className="flex items-center justify-between gap-6">
           {/* Filter chips */}
           <div className="flex flex-wrap items-center gap-2">
-            <FilterChip variant="applied" label="Last 7 days" />
-            {["Regions", "Devices"].map((label) => (
-              <FilterChip key={label} variant="dropdown" label={label} />
-            ))}
+            <DateFilter
+              open={openFilterKey === "date"}
+              onOpenChange={(next) => setOpenFilterKey(next ? "date" : null)}
+              value={dateValue}
+              onChange={setDateValue}
+              trigger={
+                <FilterChip
+                  label={dateChipLabel(dateValue)}
+                  variant="applied"
+                  isOpen={openFilterKey === "date"}
+                  onClick={() => setOpenFilterKey(openFilterKey === "date" ? null : "date")}
+                  onClear={() => {
+                    setDateValue({ mode: "preset", preset: "last7" });
+                    setOpenFilterKey(null);
+                  }}
+                />
+              }
+            />
+
+            <MultiSelectDropdown
+              label="Regions"
+              options={OPTIONS.regions}
+              selectedIds={selectedRegions}
+              open={openFilterKey === "regions"}
+              onOpenChange={(next) => setOpenFilterKey(next ? "regions" : null)}
+              onToggleId={(id) => setSelectedRegions((prev) => toggleInArray(prev, id))}
+              onClear={() => setSelectedRegions([])}
+              searchable
+              trigger={
+                <FilterChip
+                  label="Regions"
+                  count={selectedRegions.length || undefined}
+                  variant={selectedRegions.length > 0 ? "applied" : "dropdown"}
+                  isOpen={openFilterKey === "regions"}
+                  onClick={() => setOpenFilterKey(openFilterKey === "regions" ? null : "regions")}
+                />
+              }
+            />
+
+            <MultiSelectDropdown
+              label="Devices"
+              options={OPTIONS.devices}
+              selectedIds={selectedDevices}
+              open={openFilterKey === "devices"}
+              onOpenChange={(next) => setOpenFilterKey(next ? "devices" : null)}
+              onToggleId={(id) => setSelectedDevices((prev) => toggleInArray(prev, id))}
+              onClear={() => setSelectedDevices([])}
+              trigger={
+                <FilterChip
+                  label="Devices"
+                  count={selectedDevices.length || undefined}
+                  variant={selectedDevices.length > 0 ? "applied" : "dropdown"}
+                  isOpen={openFilterKey === "devices"}
+                  onClick={() => setOpenFilterKey(openFilterKey === "devices" ? null : "devices")}
+                />
+              }
+            />
           </div>
 
           {/* Metadata row — right-aligned */}

@@ -62,7 +62,7 @@ export function Toast({
           : "translate-y-3 scale-95 opacity-0 duration-[200ms]"
       }`}
     >
-      <Icon name={CheckCircle} size="sm" variant="fill" className="size-5 shrink-0 text-[#36ad84]" />
+      <Icon name={CheckCircle} size="sm" variant="outline" color="inherit" className="size-5 shrink-0 text-[#36ad84]" />
       <p className="whitespace-nowrap font-yahoo-product-sans text-[14px] font-medium leading-5 text-white">
         {message}
       </p>
