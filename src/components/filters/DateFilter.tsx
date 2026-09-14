@@ -42,6 +42,28 @@ export function dateChipLabel(value: DateFilterValue) {
   return `${value.startISO} – ${value.endISO}`;
 }
 
+/** Maps a selected date filter value to a chart point count, for consumers that render a time series. */
+export function rangeConfigForDateValue(value: DateFilterValue): { days: number; hourLabels: boolean } {
+  if (value.mode === "preset") {
+    switch (value.preset) {
+      case "last30":
+        return { days: 30, hourLabels: false };
+      case "last14":
+        return { days: 14, hourLabels: false };
+      case "last7":
+        return { days: 7, hourLabels: false };
+      case "last24h":
+        return { days: 24, hourLabels: true };
+      case "mtd":
+        return { days: new Date().getDate(), hourLabels: false };
+    }
+  }
+  const start = new Date(value.startISO);
+  const end = new Date(value.endISO);
+  const diffDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  return { days: Math.max(1, diffDays), hourLabels: false };
+}
+
 function todayISO() {
   const d = new Date();
   const y = d.getFullYear();

@@ -6,7 +6,12 @@ import { Icon } from "@yahoo/uds";
 import { Article, VideoCamera, ImageGallery, Cross } from "@yahoo/uds-icons";
 import { Modal } from "@/components/ui/Modal";
 import { FilterChip } from "@/components/FilterChip";
-import { DateFilter, dateChipLabel, type DateFilterValue } from "@/components/filters/DateFilter";
+import {
+  DateFilter,
+  dateChipLabel,
+  rangeConfigForDateValue,
+  type DateFilterValue,
+} from "@/components/filters/DateFilter";
 import { MultiSelectDropdown } from "@/components/filters/MultiSelectDropdown";
 import { OPTIONS } from "@/components/filters/FilterBar";
 import { DeleteContentDialog } from "@/components/DeleteContentDialog";
@@ -63,12 +68,12 @@ function ModalCard({
   onClose: () => void;
   onDeleteConfirm: (item: ContentModalItem, reason: string) => void;
 }) {
-  const meta = getContentMetadata(item.id);
   const [activeTab, setActiveTab] = useState<ContentPerfTab>("Views");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const [openFilterKey, setOpenFilterKey] = useState<"date" | "regions" | "devices" | null>(null);
   const [dateValue, setDateValue] = useState<DateFilterValue>({ mode: "preset", preset: "last7" });
+  const meta = getContentMetadata(item.id, rangeConfigForDateValue(dateValue));
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
 

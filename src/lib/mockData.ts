@@ -1454,9 +1454,13 @@ const CONTENT_PERF_TABS: ContentPerfTab[] = [
   "Views", "Uniques", "Reach", "CTR", "Dwell", "Comments",
 ];
 
-export function getContentMetadata(itemId: string): ContentMetadata {
-  const seedStr = `content-meta-${itemId}`;
-  faker.seed(seedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
+export function getContentMetadata(
+  itemId: string,
+  range?: { days?: number; hourLabels?: boolean }
+): ContentMetadata {
+  // Stable identity fields — independent of the selected date range.
+  const metaSeedStr = `content-meta-${itemId}`;
+  faker.seed(metaSeedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
 
   const slug = faker.string.alphanumeric(8).toLowerCase();
   const partnerUrl = `https://partner-news.com/articles/${slug}`;
@@ -1466,8 +1470,15 @@ export function getContentMetadata(itemId: string): ContentMetadata {
   const guid = faker.string.uuid();
   const documentId = `doc-${faker.string.alphanumeric(7).toLowerCase()}`;
 
+  // Chart data — regenerated per selected date range so the graph updates with it.
+  const days = Math.max(1, Math.min(range?.days ?? 7, 90));
+  const hourLabels = Boolean(range?.hourLabels);
+  const chartSeedStr = `content-chart-${itemId}-${days}-${hourLabels ? "h" : "d"}`;
+  faker.seed(chartSeedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
+
   const baseDate = new Date(2026, 0, 14);
-  const chartDates: string[] = Array.from({ length: 7 }, (_, i) => {
+  const chartDates: string[] = Array.from({ length: days }, (_, i) => {
+    if (hourLabels) return HOUR_LABELS_24[i % HOUR_LABELS_24.length];
     const d = new Date(baseDate);
     d.setDate(baseDate.getDate() + i);
     return `${d.getMonth() + 1}/${d.getDate()}`;
@@ -1476,9 +1487,10 @@ export function getContentMetadata(itemId: string): ContentMetadata {
   const tabTotals = {} as Record<ContentPerfTab, string>;
   const chartSeries = {} as Record<ContentPerfTab, number[]>;
   for (const tab of CONTENT_PERF_TABS) {
-    const total = faker.number.int({ min: 1500, max: 5000 });
+    const series = Array.from({ length: days }, () => faker.number.int({ min: 15, max: 100 }));
+    chartSeries[tab] = series;
+    const total = series.reduce((a, b) => a + b, 0) * faker.number.int({ min: 12, max: 28 });
     tabTotals[tab] = total >= 1000 ? `${(total / 1000).toFixed(1)}K` : String(total);
-    chartSeries[tab] = Array.from({ length: 7 }, () => faker.number.int({ min: 15, max: 100 }));
   }
 
   faker.seed(20260227);
