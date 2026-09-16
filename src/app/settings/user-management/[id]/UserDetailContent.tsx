@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Icon } from "@yahoo/uds";
 import {
-  Check,
   ChevronDown,
   ChevronUp,
   Cog,
@@ -13,7 +12,18 @@ import {
 } from "@yahoo/uds-icons";
 import { useOnClickOutside } from "@/lib/useOnClickOutside";
 import { useRef } from "react";
-import { getMockUserById } from "@/lib/mockData";
+import { Toast } from "@/components/ui/Toast";
+import { FormErrorBanner, RadioGroup, TextField } from "@/components/user-management/FormFields";
+import { ToolAccessCard, toolAccessFieldId } from "@/components/user-management/ToolAccessCard";
+import { useUsers } from "@/contexts/UsersContext";
+import {
+  EMPTY_TOOL_ACCESS,
+  getToolAccessErrors,
+  type EmployeeStatus,
+  type ToolAccessState,
+} from "@/lib/toolAccess";
+
+const YPP_TOOL_ID = "ypp";
 
 const FREQUENCY_OPTIONS = ["Immediate", "Daily Summary", "Weekly Summary", "Monthly Summary"];
 const CONTENT_TYPES_OPTIONS = ["Articles", "Slideshows"];
@@ -68,36 +78,63 @@ const NOTIFICATION_SECTIONS = [
   },
 ];
 
-const BRANDS = [
-  { id: "1", name: "2 Dads 2 Twins", uuid: "e3760844-0426-3ea5-9808-a6ec9035d382" },
-  { id: "2", name: "20 Minutes France", uuid: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
-  { id: "3", name: "Brand C", uuid: "b2c3d4e5-f6a7-8901-bcde-f12345678901" },
-  { id: "4", name: "Brand D", uuid: "c3d4e5f6-a7b8-9012-cdef-123456789012" },
-];
-
-const ROLES = [
-  { id: "admin", label: "Admin", description: "Role description" },
-  { id: "viewer", label: "Viewer", description: "Role description" },
-];
-
 function getInitials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 }
 
 export function UserDetailContent({ id }: { id: string }) {
   const router = useRouter();
-  const user = useMemo(() => getMockUserById(id), [id]);
+  const { getUserById, updateUser, pendingToast, clearPendingToast, showToast } = useUsers();
+  const user = getUserById(id);
   const [activeTab, setActiveTab] = useState<"profile" | "notifications">("profile");
   const [expandedSection, setExpandedSection] = useState<string>("feed-infrastructure");
-  const [selectedBrands, setSelectedBrands] = useState<string[]>(["1", "2"]);
-  const [selectedRole, setSelectedRole] = useState<string>("viewer");
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [firstName, setFirstName] = useState(user?.firstName ?? "");
+  const [lastName, setLastName] = useState(user?.lastName ?? "");
+  const [employeeStatus, setEmployeeStatus] = useState<EmployeeStatus | null>(user?.employeeStatus ?? null);
+  const [access, setAccess] = useState<ToolAccessState>(user?.access ?? EMPTY_TOOL_ACCESS);
+  const [profileDirty, setProfileDirty] = useState(false);
+  const [showAccessErrors, setShowAccessErrors] = useState(false);
+
+  const accessErrors = getToolAccessErrors(access);
+  const profileValid =
+    email.trim().includes("@") &&
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    employeeStatus !== null &&
+    accessErrors.length === 0;
+  const canSave = profileDirty && profileValid;
+
+  function markDirty<T>(setter: (v: T) => void) {
+    return (v: T) => {
+      setter(v);
+      setProfileDirty(true);
+    };
+  }
+
+  function handleSaveChanges() {
+    if (!user || !canSave || !employeeStatus) return;
+    const fn = firstName.trim();
+    const ln = lastName.trim();
+    updateUser(user.id, {
+      email: email.trim(),
+      firstName: fn,
+      lastName: ln,
+      fullName: `${fn} ${ln}`,
+      employeeStatus,
+      access,
+      role: access.operational.roleId === "admin" ? "Admin" : "Viewer",
+    });
+    setProfileDirty(false);
+    showToast("Changes saved");
+  }
+
   const [frequencyOpenSection, setFrequencyOpenSection] = useState<string | null>(null);
   const [frequencyValues, setFrequencyValues] = useState<string[]>(["Daily Summary", "Weekly Summary"]);
   const [contentQualityFrequencyValues, setContentQualityFrequencyValues] = useState<string[]>(["Daily Summary", "Weekly Summary"]);
   const [contentTypesValues, setContentTypesValues] = useState<string[]>(["Articles", "Slideshows"]);
   const [contentTypesOpen, setContentTypesOpen] = useState(false);
-  const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
   const [notificationsDirty, setNotificationsDirty] = useState(false);
   const [sectionCheckboxes, setSectionCheckboxes] = useState<Record<string, Record<string, boolean>>>(() => {
     const init: Record<string, Record<string, boolean>> = {};
@@ -115,22 +152,12 @@ export function UserDetailContent({ id }: { id: string }) {
   const frequencyRef = useRef<HTMLDivElement>(null);
   const contentQualityFreqRef = useRef<HTMLDivElement>(null);
   const contentTypesRef = useRef<HTMLDivElement>(null);
-  const brandRef = useRef<HTMLDivElement>(null);
-  const roleRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(frequencyRef, () => setFrequencyOpenSection((s) => (s === "feed-infrastructure" ? null : s)), frequencyOpenSection === "feed-infrastructure");
   useOnClickOutside(contentQualityFreqRef, () => setFrequencyOpenSection((s) => (s === "content-quality" ? null : s)), frequencyOpenSection === "content-quality");
   useOnClickOutside(contentTypesRef, () => setContentTypesOpen(false), contentTypesOpen);
-  useOnClickOutside(brandRef, () => setBrandDropdownOpen(false), brandDropdownOpen);
-  useOnClickOutside(roleRef, () => setRoleDropdownOpen(false), roleDropdownOpen);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSection((prev) => (prev === sectionId ? "" : sectionId));
-  };
-
-  const toggleBrand = (brandId: string) => {
-    setSelectedBrands((prev) =>
-      prev.includes(brandId) ? prev.filter((b) => b !== brandId) : [...prev, brandId]
-    );
   };
 
   const toggleFrequency = (value: string, sectionId: string) => {
@@ -211,6 +238,11 @@ export function UserDetailContent({ id }: { id: string }) {
               <h1 className="font-yahoo-product-sans text-[24px] font-bold leading-7 text-[#232a31]">
                 {user.fullName}
               </h1>
+              {user.inviteSent && (
+                <span className="rounded-full bg-[#f5f5f5] px-2 py-0.5 font-yahoo-product-sans text-[12px] font-medium text-[#6e7780]">
+                  Invite sent
+                </span>
+              )}
               {user.deactivated && (
                 <span className="rounded-full bg-[#f5f5f5] px-2 py-0.5 font-yahoo-product-sans text-[12px] font-medium text-[#6e7780]">
                   Deactivated account
@@ -265,198 +297,97 @@ export function UserDetailContent({ id }: { id: string }) {
 
       {activeTab === "profile" && (
         <div className="flex max-w-[640px] flex-col gap-8">
+          {showAccessErrors && (
+            <FormErrorBanner
+              items={accessErrors.map((e) => ({
+                id: e.field,
+                label: e.message,
+                targetId: toolAccessFieldId(YPP_TOOL_ID, e.field),
+              }))}
+            />
+          )}
+
           <div className="flex flex-col gap-6">
-            <div>
-              <label className="mb-1.5 block font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#464e56]">
-                Email (required)
-              </label>
-              <input
-                type="email"
-                defaultValue={user.email}
-                className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
+            <TextField
+              id="user-email"
+              label="Email"
+              type="email"
+              required
+              value={email}
+              onChange={markDirty(setEmail)}
+              autoComplete="off"
+            />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <TextField
+                id="user-first-name"
+                label="First name"
+                required
+                value={firstName}
+                onChange={markDirty(setFirstName)}
+                autoComplete="off"
+              />
+              <TextField
+                id="user-last-name"
+                label="Last name"
+                required
+                value={lastName}
+                onChange={markDirty(setLastName)}
+                autoComplete="off"
               />
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="mb-1.5 block font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#464e56]">
-                  First name (required)
-                </label>
-                <input
-                  type="text"
-                  defaultValue={user.firstName}
-                  className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#464e56]">
-                  Last name (required)
-                </label>
-                <input
-                  type="text"
-                  defaultValue={user.lastName}
-                  className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#232a31]">
-                Operational access
-              </h3>
-              <p className="mt-1 font-yahoo-product-sans text-[14px] font-normal leading-5 text-[#6e7780]">
-                Assign access across YPP. Use sparingly.
-              </p>
-              <div ref={roleRef} className="relative mt-2">
-                <button
-                  type="button"
-                  onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                  className="flex h-9 w-full max-w-[608px] items-center justify-between rounded-[4px] border border-[#e0e4e9] bg-white px-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] hover:border-[#828a93]"
-                >
-                  <span>{ROLES.find((r) => r.id === selectedRole)?.label ?? "Viewer"}</span>
-                  <Icon name={ChevronDown} size="sm" variant="outline" className="size-4 text-[#6e7780]" />
-                </button>
-                {roleDropdownOpen && (
-                  <div className="absolute left-0 top-full z-50 mt-1 w-full max-w-[608px] rounded-[4px] border border-[#e0e4e9] bg-white py-2 shadow-[0px_8px_24px_rgba(16,24,40,0.12)]">
-                    {ROLES.map((r) => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedRole(r.id);
-                          setRoleDropdownOpen(false);
-                        }}
-                        className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-[#f5f8fa]"
-                      >
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#232a31]">
-                            {r.label}
-                          </span>
-                          <span className="font-yahoo-product-sans text-[12px] font-normal leading-4 text-[#6e7780]">
-                            {r.description}
-                          </span>
-                        </div>
-                        {selectedRole === r.id && (
-                          <Icon name={Check} size="sm" variant="outline" className="shrink-0 text-[#5D5EFF]" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-yahoo-product-sans text-[16px] font-medium leading-5 text-[#232a31]">
-                Brand access (optional)
-              </h3>
-              <p className="mt-1 font-yahoo-product-sans text-[14px] font-normal leading-5 text-[#6e7780]">
-                Assign brand that the role extends to.{" "}
-                <button type="button" className="underline hover:no-underline">
-                  See role details
-                </button>
-              </p>
-              <div ref={brandRef} className="relative mt-2">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setBrandDropdownOpen(!brandDropdownOpen)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setBrandDropdownOpen((v) => !v);
-                    }
-                  }}
-                  className="flex min-h-9 w-full max-w-[608px] cursor-pointer flex-wrap items-center gap-2 rounded-[4px] border border-[#e0e4e9] bg-white px-3 py-2 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] hover:border-[#828a93]"
-                >
-                  {selectedBrands.map((bid) => {
-                    const b = BRANDS.find((x) => x.id === bid);
-                    return b ? (
-                      <span
-                        key={b.id}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#f0f3f5] pl-2 pr-1 py-0.5"
-                      >
-                        {b.name}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleBrand(b.id);
-                          }}
-                          className="rounded-full p-0.5 hover:bg-[#e0e4e9]"
-                          aria-label={`Remove ${b.name}`}
-                        >
-                          <Icon name={Cross} size="sm" variant="outline" className="size-3.5" />
-                        </button>
-                      </span>
-                    ) : null;
-                  })}
-                  <Icon name={ChevronDown} size="sm" variant="outline" className="ml-auto size-4 text-[#6e7780]" />
-                </div>
-                {brandDropdownOpen && (
-                  <div className="absolute left-0 top-full z-50 mt-1 max-h-60 w-full max-w-[608px] overflow-y-auto rounded-[4px] border border-[#e0e4e9] bg-white py-2 shadow-[0px_8px_24px_rgba(16,24,40,0.12)]">
-                    <label className="flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-[#f5f8fa]">
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.length === BRANDS.length}
-                        onChange={() => {
-                          setSelectedBrands(
-                            selectedBrands.length === BRANDS.length ? [] : BRANDS.map((b) => b.id)
-                          );
-                        }}
-                        className="rounded border-[#e0e4e9] accent-[#232a31]"
-                      />
-                      <span className="font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#232a31]">
-                        Select all
-                      </span>
-                    </label>
-                    {BRANDS.map((b) => {
-                      const isSelected = selectedBrands.includes(b.id);
-                      return (
-                        <button
-                          key={b.id}
-                          type="button"
-                          onClick={() => toggleBrand(b.id)}
-                          className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-[#f5f8fa]"
-                        >
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#232a31]">
-                              {b.name}
-                            </span>
-                            {b.uuid && (
-                              <span className="font-yahoo-product-sans text-[12px] font-normal leading-4 text-[#6e7780]">
-                                {b.uuid}
-                              </span>
-                            )}
-                          </div>
-                          {isSelected && (
-                            <Icon name={Check} size="sm" variant="outline" className="shrink-0 text-[#5D5EFF]" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+            <RadioGroup<EmployeeStatus>
+              label="Employee status"
+              required
+              name="user-employee-status"
+              value={employeeStatus}
+              onChange={markDirty(setEmployeeStatus)}
+              options={[
+                { value: "employee", label: "Employee (full-time or contract)" },
+                { value: "non-employee", label: "Non-employee (external partner or freelancer)" },
+              ]}
+            />
           </div>
+
+          <section className="flex flex-col gap-2.5">
+            <h2 className="py-2 font-yahoo-product-sans text-[18px] font-bold leading-6 text-[#232a31]">
+              Tool access
+            </h2>
+            <ToolAccessCard
+              toolId={YPP_TOOL_ID}
+              toolName="Yahoo Partner Portal"
+              value={access}
+              onChange={markDirty(setAccess)}
+              disabled={employeeStatus === null}
+              showErrors={showAccessErrors}
+              onBlockedCollapse={() => setShowAccessErrors(true)}
+              onRemove={() => markDirty(setAccess)(EMPTY_TOOL_ACCESS)}
+            />
+          </section>
 
           <div className="flex justify-end gap-3 border-t border-[#f0f3f5] pt-6">
             <button
               type="button"
-              onClick={() => router.back()}
-              className="h-9 rounded-full border border-[#e0e4e9] bg-white px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
+              onClick={() => router.push("/settings/user-management")}
+              className="h-9 rounded-full border border-[#e0e4e9] bg-white px-5 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
             >
               Cancel
             </button>
+            {user.inviteSent && (
+              <button
+                type="button"
+                onClick={() => showToast("Invite resent")}
+                className="h-9 rounded-full border border-[#e0e4e9] bg-white px-5 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
+              >
+                Resend invite
+              </button>
+            )}
             <button
               type="button"
-              className="h-9 rounded-full border border-[#e0e4e9] bg-white px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
-            >
-              Resend invite
-            </button>
-            <button
-              type="button"
-              className="h-9 rounded-full bg-[#5D5EFF] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-white hover:bg-[#4A4BE8]"
+              onClick={handleSaveChanges}
+              disabled={!canSave}
+              className={`h-9 rounded-full px-5 font-yahoo-product-sans text-[14px] font-medium text-white transition-colors ${
+                canSave ? "bg-[#5D5EFF] hover:bg-[#4A4BE8]" : "cursor-not-allowed bg-[#e0e4e9]"
+              }`}
             >
               Save changes
             </button>
@@ -700,6 +631,8 @@ export function UserDetailContent({ id }: { id: string }) {
           </div>
         </div>
       )}
+
+      <Toast open={pendingToast !== null} message={pendingToast ?? ""} onClose={clearPendingToast} />
     </div>
   );
 }

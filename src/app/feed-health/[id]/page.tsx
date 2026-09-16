@@ -16,6 +16,7 @@ import { TablePagination } from "@/components/TablePagination";
 import { ContentDetailsModal } from "@/components/ContentDetailsModal";
 import { WarningIssueModal } from "@/components/WarningIssueModal";
 import { FailureIssueModal } from "@/components/FailureIssueModal";
+import { Toast } from "@/components/ui/Toast";
 import { useTimeFilter } from "@/contexts/TimeFilterContext";
 import {
   getFeedVitalsRowById,
@@ -379,6 +380,7 @@ export default function FeedHealthDetailPage({
   const [contentModal, setContentModal] = useState<ContentModalItem | null>(null);
   const [warnModal, setWarnModal] = useState<ContentModalItem | null>(null);
   const [failModal, setFailModal] = useState<ContentModalItem | null>(null);
+  const [toastOpen, setToastOpen] = useState(false);
 
   function openContentModal(item: ContentModalItem) {
     setContentModal(item);
@@ -530,6 +532,15 @@ export default function FeedHealthDetailPage({
         open={contentModal !== null}
         onClose={() => setContentModal(null)}
         item={contentModal}
+        onDeleteConfirm={() => {
+          setContentModal(null);
+          setToastOpen(true);
+        }}
+      />
+      <Toast
+        open={toastOpen}
+        message="Content deletion confirmed"
+        onClose={() => setToastOpen(false)}
       />
       <WarningIssueModal
         open={warnModal !== null}

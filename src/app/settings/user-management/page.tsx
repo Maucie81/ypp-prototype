@@ -1,62 +1,80 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@yahoo/uds";
 import { MagnifyingGlass } from "@yahoo/uds-icons";
 import { PageHeader } from "@/components/PageHeader";
 import { TablePagination } from "@/components/TablePagination";
-import { getMockUsers } from "@/lib/mockData";
+import { Toast } from "@/components/ui/Toast";
+import { useUsers, type PortalUser } from "@/contexts/UsersContext";
+import { ACCESS_BRANDS, EDITORIAL_ROLES, OPERATIONAL_ROLES, labelFor } from "@/lib/toolAccess";
 
 function getInitials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+}
+
+function roleLabel(user: PortalUser): string {
+  if (user.access.operational.enabled) return labelFor(OPERATIONAL_ROLES, user.access.operational.roleId) ?? user.role;
+  if (user.access.team.enabled) return labelFor(EDITORIAL_ROLES, user.access.team.roleId) ?? "—";
+  return "—";
+}
+
+function brandLabel(user: PortalUser): string {
+  if (!user.inviteSent) return user.brand;
+  const ids = user.access.brand.enabled ? user.access.brand.brandIds : [];
+  if (ids.length === 0) return "—";
+  const first = labelFor(ACCESS_BRANDS, ids[0]) ?? "—";
+  return ids.length > 1 ? `${first} +${ids.length - 1}` : first;
 }
 
 export default function UserManagementPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const totalRows = 1253;
-  const users = useMemo(() => getMockUsers(), []);
+  const { users, pendingToast, clearPendingToast } = useUsers();
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Users"
         actions={
-          <button
-            type="button"
-            className="h-9 rounded-full bg-[#5D5EFF] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-white hover:bg-[#4A4BE8]"
+          <Link
+            href="/settings/user-management/add"
+            className="flex h-9 items-center rounded-full bg-[#5D5EFF] px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-white hover:bg-[#4A4BE8]"
           >
             Add user
-          </button>
+          </Link>
         }
       >
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex min-w-[280px] flex-1">
+        <div className="flex w-full flex-col gap-4">
+          <div className="relative flex w-full">
             <Icon
               name={MagnifyingGlass}
               size="sm"
               variant="outline"
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#828a93]"
+              className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#232a31]"
             />
             <input
               type="search"
               placeholder="Search by keyword"
-              className="h-9 w-full rounded-[4px] border border-[#e0e4e9] bg-white py-2 pl-9 pr-3 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] placeholder:text-[#828a93] focus:border-[#5D5EFF] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
+              className="h-11 w-full rounded-full border-none bg-[#f0f3f5] py-2 pl-11 pr-4 font-yahoo-product-sans text-[14px] leading-5 text-[#232a31] placeholder:text-[#6e7780] focus:outline-none focus:ring-1 focus:ring-[#5D5EFF]"
             />
           </div>
-          <button
-            type="button"
-            className="h-[36px] rounded-full border border-[#e0e4e9] bg-white px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
-          >
-            Sort by: Last name
-          </button>
-          <button
-            type="button"
-            className="h-[36px] rounded-full border border-[#e0e4e9] bg-white px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
-          >
-            Brand filter
-          </button>
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              className="h-[36px] rounded-full border border-[#e0e4e9] bg-white px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
+            >
+              Sort by: Last name
+            </button>
+            <button
+              type="button"
+              className="h-[36px] rounded-full border border-[#e0e4e9] bg-white px-4 py-2 font-yahoo-product-sans text-[14px] font-medium text-[#232a31] hover:bg-[#f5f8fa]"
+            >
+              Brand filter
+            </button>
+          </div>
         </div>
       </PageHeader>
 
@@ -98,6 +116,11 @@ export default function UserManagementPage() {
                       </span>
                       <span className="flex items-center gap-2">
                         {user.fullName}
+                        {user.inviteSent && (
+                          <span className="rounded-full bg-[#f5f5f5] px-2 py-0.5 font-yahoo-product-sans text-[12px] font-medium text-[#6e7780]">
+                            Invite sent
+                          </span>
+                        )}
                         {user.deactivated && (
                           <span className="rounded-full bg-[#f5f5f5] px-2 py-0.5 font-yahoo-product-sans text-[12px] font-medium text-[#6e7780]">
                             Deactivated account
@@ -110,10 +133,10 @@ export default function UserManagementPage() {
                     {user.email}
                   </td>
                   <td className="h-[52px] px-4 font-normal text-[#232a31]">
-                    {user.role}
+                    {roleLabel(user)}
                   </td>
                   <td className="h-[52px] px-4 font-normal text-[#464e56]">
-                    {user.brand}
+                    {brandLabel(user)}
                   </td>
                   <td className="h-[52px] px-4 font-normal text-[#464e56]">
                     {user.lastSignIn}
@@ -123,15 +146,20 @@ export default function UserManagementPage() {
             </tbody>
           </table>
         </div>
-        <TablePagination
-          totalRows={totalRows}
-          pageSize={pageSize}
-          currentPage={page}
-          onPageSizeChange={setPageSize}
-          onPageChange={setPage}
-          embedded
-        />
+        {/* pr-1.5: the last-page arrow glyph sits 10px inside its 32px hit area, so 6px + 10px lands on the cells' 16px padding line */}
+        <div className="pl-4 pr-1.5">
+          <TablePagination
+            totalRows={totalRows}
+            pageSize={pageSize}
+            currentPage={page}
+            onPageSizeChange={setPageSize}
+            onPageChange={setPage}
+            embedded
+          />
+        </div>
       </div>
+
+      <Toast open={pendingToast !== null} message={pendingToast ?? ""} onClose={clearPendingToast} />
     </div>
   );
 }

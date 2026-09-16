@@ -1,7 +1,9 @@
+import { UsersProvider } from "@/contexts/UsersContext";
+
 export default function SettingsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <UsersProvider>{children}</UsersProvider>;
 }
