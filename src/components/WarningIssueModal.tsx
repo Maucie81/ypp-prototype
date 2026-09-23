@@ -13,7 +13,7 @@ export function WarningIssueModal({
   onClose: () => void;
   item: ContentModalItem | null;
 }) {
-  const data = item ? getContentIssueWarning(item.id) : null;
+  const data = item ? getContentIssueWarning(item) : null;
 
   return (
     <Modal

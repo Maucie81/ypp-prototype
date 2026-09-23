@@ -13,7 +13,7 @@ export function FailureIssueModal({
   onClose: () => void;
   item: ContentModalItem | null;
 }) {
-  const data = item ? getContentIssueFailure(item.id) : null;
+  const data = item ? getContentIssueFailure(item) : null;
 
   return (
     <Modal

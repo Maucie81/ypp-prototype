@@ -652,9 +652,9 @@ const ISSUE_POOL = [
   "Unexpected drop in items ingested",
 ];
 
-/** URL-safe id for an issue, so a table row and its detail page agree on which issue it is. */
-function issueSlug(issue: string): string {
-  return issue.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+/** URL-safe id from a name — lets an issue row and its detail page agree on which issue it is. */
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 /** Keeps the first row for each issue — the same issue listed twice in one table reads as a bug. */
@@ -664,7 +664,7 @@ function oneRowPerIssue(rows: IssueSummaryRow[]): IssueSummaryRow[] {
   for (const row of rows) {
     if (seen.has(row.issue)) continue;
     seen.add(row.issue);
-    out.push({ ...row, id: issueSlug(row.issue) });
+    out.push({ ...row, id: slugify(row.issue) });
   }
   return out;
 }
@@ -789,7 +789,7 @@ export function getIssuesDetected(range?: DateRangePreset): IssueSummaryRow[] {
         return v;
       });
       return {
-        id: issueSlug(issue),
+        id: slugify(issue),
         issue,
         type,
         trend,
@@ -976,6 +976,11 @@ interface Story {
   brand: string;
   /** Publisher that supplied it (global search results). */
   provider: string;
+  /**
+   * Set only on stories whose body really contains a restricted word; the
+   * "Restricted word" warning is shown for these and never for others.
+   */
+  restricted?: { word: string; excerpt: string };
 }
 
 const STORIES: Story[] = [
@@ -1002,6 +1007,10 @@ const STORIES: Story[] = [
     description: "Snow and freezing rain are expected across the Plains and Northeast during the busiest travel days of the year, and airlines are already waiving change fees.",
     brand: "Yahoo News",
     provider: "AccuWeather",
+    restricted: {
+      word: "deaths",
+      excerpt: "The system has already been blamed for at least three deaths in the Rockies, where more than a foot of snow closed mountain passes on Monday. Forecasters expect it to strengthen as it moves east, bringing freezing rain to the Plains and heavy snow to the Northeast by Wednesday.",
+    },
   },
   {
     title: "Scientists discover new deep-sea species off the coast of New Zealand",
@@ -1062,12 +1071,20 @@ const STORIES: Story[] = [
     description: "Controllers ordered both aircraft to abort after spotting the conflict, and no injuries were reported among the more than 300 people on board.",
     brand: "Yahoo News",
     provider: "ABC News",
+    restricted: {
+      word: "crash",
+      excerpt: "A controller cleared a regional jet for takeoff while a second plane was still crossing the same runway. Both crews were told to stop, and the aircraft came to rest less than 1,000 feet apart. Safety experts say it is the latest in a string of near misses that could have ended in a crash.",
+    },
   },
   {
     title: "Wildfire containment improves as crews brace for shifting winds this weekend",
     description: "Firefighters have the blaze more than half contained, but forecasters warn that gusty offshore winds could push it toward evacuated neighborhoods.",
     brand: "Yahoo News",
     provider: "AccuWeather",
+    restricted: {
+      word: "killed",
+      excerpt: "Crews have the fire 55% contained after it burned more than 12,000 acres, destroyed 40 homes and killed two people. Forecasters warn that gusty offshore winds expected Saturday could push the flames back toward neighborhoods that were evacuated earlier in the week.",
+    },
   },
   {
     title: "Streaming platforms raise prices again as ad tiers expand across services",
@@ -1164,18 +1181,30 @@ const STORIES: Story[] = [
     description: "The 48-yard kick capped a comeback from 17 points down and sent the team to the postseason for the first time in nine years.",
     brand: "Yahoo Sports",
     provider: "Yahoo Sports",
+    restricted: {
+      word: "betting",
+      excerpt: "Down 17 points at halftime, the team rallied behind its backup quarterback and a defense that forced three turnovers. The 48-yard kick as time expired completed one of the biggest betting upsets of the season and sent the franchise to its first playoff game in nine years.",
+    },
   },
   {
     title: "Star point guard signs record extension ahead of trade deadline",
     description: "The five-year deal makes him the highest-paid player in franchise history and ends weeks of speculation about his future with the team.",
     brand: "Yahoo Sports",
     provider: "Yahoo Sports",
+    restricted: {
+      word: "betting",
+      excerpt: "The five-year extension makes him the highest-paid player in franchise history and ends weeks of trade speculation. Within an hour of the announcement, betting odds on the team winning the title shortened sharply. The front office says the deal still leaves room to add another starter before the deadline.",
+    },
   },
   {
     title: "Rookie goalkeeper posts third straight shutout",
     description: "The 21-year-old has not allowed a goal in 270 minutes since being called up, the longest streak by a first-year keeper in league history.",
     brand: "Yahoo Sports",
     provider: "Yahoo Sports",
+    restricted: {
+      word: "betting",
+      excerpt: "The 21-year-old has not allowed a goal in 270 minutes since being called up from the reserve side. He is now the betting favorite for rookie of the year, a remarkable turn for a player who started the season as the club's third-choice keeper.",
+    },
   },
   {
     title: "Marathon organizers add heat safety measures after record temperatures",
@@ -1236,6 +1265,16 @@ const STORIES: Story[] = [
     description: "Volunteers counted more than 200 nests this season on a stretch of coastline that had none a decade ago, before a dune restoration project.",
     brand: "Yahoo News",
     provider: "National Geographic",
+  },
+  {
+    title: "States weigh legalizing online gambling as tax revenue climbs",
+    description: "Lawmakers in several states say online casino apps could bring in hundreds of millions a year, while critics warn about the risk of addiction.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+    restricted: {
+      word: "gambling",
+      excerpt: "At least six states will consider bills this session that would allow online casino games, following the rapid spread of mobile sports apps. Supporters point to neighboring states that now collect hundreds of millions in annual tax revenue. Opponents, including several addiction-treatment groups, say online gambling is harder to regulate than in-person casinos.",
+    },
   },
   {
     title: "Mortgage rates dip to lowest level in six months",
@@ -1761,130 +1800,124 @@ function _quickHash(s: string): number {
 
 // ─── Static variant content (matches Figma node specs) ───────────────────────
 
-const _WARN_CODE_EXCERPT =
-  `<p>As data journalism evolves, interactive visualizations are becoming an essential tool for telling complex stories. The following visualization demonstrates the correlation between education funding and graduation rates across different states.</p> ` +
-  `<div class='tableauPlaceholder'> <object class='tableauViz'> <param name='host_url' value='https://public.tableau.com/' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /> <param name='name' value='DataVisualizationExample/Dashboard1' /> <param name='tabs' value='no' /> <param name='toolbar' value='yes' /> </object> </div>` +
-  ` <p>The visualization above shows a clear trend: states that invest more in education per student tend to have higher graduation rates, though there are notable exceptions worth exploring.</p>`;
+const _TABLEAU_EMBED =
+  "<div class='tableauPlaceholder'> <object class='tableauViz'> <param name='host_url' value='https://public.tableau.com/' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /> <param name='name' value='DataVisualizationExample/Dashboard1' /> <param name='tabs' value='no' /> <param name='toolbar' value='yes' /> </object> </div>";
 
-const _WARN_TEXT_EXCERPT =
-  "As the weekend approaches, sports fans are eagerly awaiting the upcoming matchups. Our experts have analyzed the latest trends and statistics to provide you with insights into the games. The Giants are favored to win against the Eagles, with betting odds currently at -135. Most sportsbooks are predicting a close game, but the Giants' strong home record gives them an edge. In basketball, the Lakers vs. Warriors matchup has garnered significant attention with the spread set at just 2.5 points. The over/under for total points is 228.5.";
+const _FAIL_PUBDATE = "<pubDate>Wed, 14 Jan 2026 09:00:00 GMT</pubDate>";
 
-const _FAIL_CODE_EXCERPT =
-  `<item> <title>10 Best Places to Visit in Europe This Summer</title> <link>https://example.com/europe-travel-2025</link> <description>Discover the most beautiful destinations...</description>` +
-  `<pubDate>Wed, 14 May 2025 09:00:00 GMT</pubDate>` +
-  `<guid>travel-europe-2025-001</guid> <enclosure url="https://example.com/images/europe.jpg" length="0" type="image/jpeg"/> </item>`;
+function findStory(title: string): Story | undefined {
+  return STORIES.find((story) => story.title === title);
+}
 
-export function getContentIssueWarning(itemId: string): IssueModalData {
-  const variant = _quickHash(itemId) % 4;
+/** The item's own markup with the embed that was stripped out of it. */
+function embedExcerpt(item: ContentModalItem): string {
+  return (
+    `<p>${item.description}</p> ` +
+    _TABLEAU_EMBED +
+    " <p>Use the interactive chart above to explore the full data.</p>"
+  );
+}
 
-  // Variant 0 — "Unsupported embed removed": single, code excerpt, button footer
-  if (variant === 0) {
+/** The item's own feed entry, showing where the missing required field belongs. */
+function schemaExcerpt(item: ContentModalItem): string {
+  const slug = slugify(item.title).split("-").slice(0, 6).join("-");
+  const teaser = item.description.split(" ").slice(0, 8).join(" ");
+  return (
+    `<item> <title>${item.title}</title> <link>https://example.com/${slug}</link> <description>${teaser}...</description>` +
+    _FAIL_PUBDATE +
+    `<guid>${slug}-001</guid> <enclosure url="https://example.com/images/${slug}.jpg" length="0" type="image/jpeg"/> </item>`
+  );
+}
+
+export function getContentIssueWarning(item: ContentModalItem): IssueModalData {
+  const itemId = item.id;
+  const hash = _quickHash(itemId);
+  const restricted = findStory(item.title)?.restricted;
+
+  const embedIssue = {
+    title: "Warning",
+    description:
+      `Our system detected and removed an unsupported HTML tag from this content so that it displays correctly and safely. As a result, the text or code that was inside this tag may appear as unformatted plain text or cause other display issues.`,
+    actionText:
+      "Remove the unsupported tag from your feed. Review our technical guidelines for a list of supported HTML tags.",
+    actionLinkText: "technical guidelines",
+    excerptType: "code" as const,
+    excerptContent: embedExcerpt(item),
+    excerptLabel: "Content excerpt",
+    flaggedTerms: [_TABLEAU_EMBED],
+  };
+
+  // Restricted-word variants only for items whose body really contains one.
+  if (restricted) {
+    const restrictedIssue = {
+      description:
+        `Our system detected a restricted word in this item. The content was published, but the presence of this word may limit its distribution.`,
+      actionText:
+        "Review this content and remove the restricted word to get the widest possible distribution. If you believe the system made a mistake, please contact our support team.",
+      excerptType: "text" as const,
+      excerptContent: restricted.excerpt,
+      excerptLabel: "Content excerpt",
+      flaggedTerms: [restricted.word],
+    };
+
+    // "Restricted word": single, text excerpt with flagged term, link footer
+    if (hash % 2 === 0) {
+      return {
+        issueType: "warning",
+        variant: "single",
+        modalTitle: "Restricted word",
+        issues: [{ id: `${itemId}-warn-2`, title: "Warning", ...restrictedIssue }],
+        footerType: "link",
+      };
+    }
+
+    // "Multiple issues": two accordion rows, button footer per expanded item
+    return {
+      issueType: "warning",
+      variant: "multiple",
+      modalTitle: "Multiple issues",
+      issues: [
+        { ...embedIssue, id: `${itemId}-warn-m0`, title: "Content warning: Unsupported content removed" },
+        { id: `${itemId}-warn-m1`, title: "Content warning: Restricted word", ...restrictedIssue },
+      ],
+      footerType: "button",
+    };
+  }
+
+  // "Unsupported embed removed": single, code excerpt, button footer
+  if (hash % 2 === 0) {
     return {
       issueType: "warning",
       variant: "single",
       modalTitle: "Unsupported embed removed",
-      issues: [{
-        id: `${itemId}-warn-0`,
-        title: "Warning",
-        description:
-          `Our system detected and removed an unsupported HTML tag from this content so that it displays correctly and safely. As a result, the text or code that was inside this tag may appear as unformatted plain text or cause other display issues.`,
-        actionText:
-          "Remove the unsupported tag from your feed. Review our technical guidelines for a list of supported HTML tags.",
-        actionLinkText: "technical guidelines",
-        excerptType: "code",
-        excerptContent: _WARN_CODE_EXCERPT,
-        excerptLabel: "Content excerpt",
-        flaggedTerms: [
-          "<div class='tableauPlaceholder'> <object class='tableauViz'> <param name='host_url' value='https://public.tableau.com/' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /> <param name='name' value='DataVisualizationExample/Dashboard1' /> <param name='tabs' value='no' /> <param name='toolbar' value='yes' /> </object> </div>",
-        ],
-      }],
+      issues: [{ ...embedIssue, id: `${itemId}-warn-0` }],
       footerType: "button",
     };
   }
 
-  // Variant 1 — "Low image quality": single, image placeholder, button footer
-  if (variant === 1) {
-    return {
-      issueType: "warning",
-      variant: "single",
-      modalTitle: "Low image quality",
-      issues: [{
-        id: `${itemId}-warn-1`,
-        title: "Warning",
-        description:
-          "This video appears to have low technical quality, such as low bitrate or resolution. The content was published, but its distribution may be limited.",
-        actionText:
-          "Review our video specifications and make sure your content meets our guidelines for bitrate and resolution.",
-        actionLinkText: "video specifications",
-        excerptType: "image",
-        excerptContent: "",
-        excerptLabel: "Content excerpt",
-      }],
-      footerType: "button",
-    };
-  }
-
-  // Variant 2 — "Restricted word": single, text excerpt with flagged term, link footer
-  if (variant === 2) {
-    return {
-      issueType: "warning",
-      variant: "single",
-      modalTitle: "Restricted word",
-      issues: [{
-        id: `${itemId}-warn-2`,
-        title: "Warning",
-        description:
-          `Our system detected a restricted word in this item. The content was published, but the presence of this word may limit its distribution.`,
-        actionText:
-          "Review this content and remove the restricted word to get the widest possible distribution. If you believe the system made a mistake, please contact our support team.",
-        excerptType: "text",
-        excerptContent: _WARN_TEXT_EXCERPT,
-        excerptLabel: "Content excerpt",
-        flaggedTerms: ["betting"],
-      }],
-      footerType: "link",
-    };
-  }
-
-  // Variant 3 — "Multiple issues": two accordion rows, button footer per expanded item
+  // "Low image quality": single, image placeholder, button footer
   return {
     issueType: "warning",
-    variant: "multiple",
-    modalTitle: "Multiple issues",
-    issues: [
-      {
-        id: `${itemId}-warn-m0`,
-        title: "Content warning: Unsupported content removed",
-        description:
-          `Our system detected and removed an unsupported HTML tag from this content so that it displays correctly and safely. As a result, the text or code that was inside this tag may appear as unformatted plain text or cause other display issues.`,
-        actionText:
-          "Remove the unsupported tag from your feed. Review our technical guidelines for a list of supported HTML tags.",
-        actionLinkText: "technical guidelines",
-        excerptType: "code",
-        excerptContent: _WARN_CODE_EXCERPT,
-        excerptLabel: "Content excerpt",
-        flaggedTerms: [
-          "<div class='tableauPlaceholder'> <object class='tableauViz'> <param name='host_url' value='https://public.tableau.com/' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /> <param name='name' value='DataVisualizationExample/Dashboard1' /> <param name='tabs' value='no' /> <param name='toolbar' value='yes' /> </object> </div>",
-        ],
-      },
-      {
-        id: `${itemId}-warn-m1`,
-        title: "Content warning: Restricted word",
-        description:
-          `Our system detected a restricted word in this item. The content was published, but the presence of this word may limit its distribution.`,
-        actionText:
-          "Review this content and remove the restricted word to get the widest possible distribution. If you believe the system made a mistake, please contact our support team.",
-        excerptType: "text",
-        excerptContent: _WARN_TEXT_EXCERPT,
-        excerptLabel: "Content excerpt",
-        flaggedTerms: ["betting"],
-      },
-    ],
+    variant: "single",
+    modalTitle: "Low image quality",
+    issues: [{
+      id: `${itemId}-warn-1`,
+      title: "Warning",
+      description:
+        "This video appears to have low technical quality, such as low bitrate or resolution. The content was published, but its distribution may be limited.",
+      actionText:
+        "Review our video specifications and make sure your content meets our guidelines for bitrate and resolution.",
+      actionLinkText: "video specifications",
+      excerptType: "image",
+      excerptContent: "",
+      excerptLabel: "Content excerpt",
+    }],
     footerType: "button",
   };
 }
 
-export function getContentIssueFailure(itemId: string): IssueModalData {
+export function getContentIssueFailure(item: ContentModalItem): IssueModalData {
+  const itemId = item.id;
   const variant = _quickHash(`fail-${itemId}`) % 3;
 
   // Variant 0 — "Missing required field": single, code excerpt, button footer
@@ -1902,9 +1935,9 @@ export function getContentIssueFailure(itemId: string): IssueModalData {
           "Add the required field to the item. Review our technical guidelines for a list of required fields.",
         actionLinkText: "technical guidelines",
         excerptType: "code",
-        excerptContent: _FAIL_CODE_EXCERPT,
+        excerptContent: schemaExcerpt(item),
         excerptLabel: "Required schema format",
-        flaggedTerms: ["<pubDate>Wed, 14 May 2025 09:00:00 GMT</pubDate>"],
+        flaggedTerms: [_FAIL_PUBDATE],
       }],
       footerType: "button",
     };
@@ -1946,9 +1979,9 @@ export function getContentIssueFailure(itemId: string): IssueModalData {
           "Add the required field to the item. Review our technical guidelines for a list of required fields.",
         actionLinkText: "technical guidelines",
         excerptType: "code",
-        excerptContent: _FAIL_CODE_EXCERPT,
+        excerptContent: schemaExcerpt(item),
         excerptLabel: "Required schema format",
-        flaggedTerms: ["<pubDate>Wed, 14 May 2025 09:00:00 GMT</pubDate>"],
+        flaggedTerms: [_FAIL_PUBDATE],
       },
       {
         id: `${itemId}-fail-m1`,
