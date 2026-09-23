@@ -652,7 +652,24 @@ const ISSUE_POOL = [
   "Unexpected drop in items ingested",
 ];
 
-const issueSummaryRows: IssueSummaryRow[] = Array.from({ length: 25 }).map(() => {
+/** URL-safe id for an issue, so a table row and its detail page agree on which issue it is. */
+function issueSlug(issue: string): string {
+  return issue.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+/** Keeps the first row for each issue — the same issue listed twice in one table reads as a bug. */
+function oneRowPerIssue(rows: IssueSummaryRow[]): IssueSummaryRow[] {
+  const seen = new Set<string>();
+  const out: IssueSummaryRow[] = [];
+  for (const row of rows) {
+    if (seen.has(row.issue)) continue;
+    seen.add(row.issue);
+    out.push({ ...row, id: issueSlug(row.issue) });
+  }
+  return out;
+}
+
+const rawIssueSummaryRows: IssueSummaryRow[] = Array.from({ length: 25 }).map(() => {
   const type = faker.helpers.arrayElement([
     "published_with_warning",
     "not_published",
@@ -672,6 +689,10 @@ const issueSummaryRows: IssueSummaryRow[] = Array.from({ length: 25 }).map(() =>
     volume: faker.number.int({ min: 800, max: 4500 }),
   };
 });
+// Generated 25 wide and then collapsed, rather than built from ISSUE_POOL
+// directly, so the random draws that follow (the Feed health KPI cards) stay
+// the same.
+const issueSummaryRows = oneRowPerIssue(rawIssueSummaryRows);
 
 const publishingVitalsKpis: PublishingVitalsKpi[] = [
   {
@@ -760,7 +781,7 @@ export function getIssuesDetected(range?: DateRangePreset): IssueSummaryRow[] {
   if (range) {
     const seed = `issues-detected-${range}`;
     faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
-    const out = Array.from({ length: 25 }).map(() => {
+    const out = faker.helpers.shuffle([...ISSUE_POOL]).map((issue) => {
       const type = faker.helpers.arrayElement(["published_with_warning", "not_published"] as const);
       let v = faker.number.int({ min: 1500, max: 3500 });
       const trend = Array.from({ length: 8 }).map(() => {
@@ -768,8 +789,8 @@ export function getIssuesDetected(range?: DateRangePreset): IssueSummaryRow[] {
         return v;
       });
       return {
-        id: faker.string.uuid(),
-        issue: faker.helpers.arrayElement(ISSUE_POOL),
+        id: issueSlug(issue),
+        issue,
         type,
         trend,
         volume: faker.number.int({ min: 800, max: 4500 }),
@@ -943,33 +964,299 @@ export interface ContentPerformanceDimensionRow {
   contentType?: string;
 }
 
-const HEADLINE_POOL = [
-  "A once-in-a-decade bomb cyclone is taking shape off the West Coast",
-  "Italian village offers $1 homes to Americans upset by the U.S. election result",
-  "'Doomsday fish' returns to Southern California shores for the third time this year",
-  "Winter storms forecast to hit much of U.S. as Americans gear up for Thanksgiving travel",
-  "Some Arab Americans who voted for Trump are concerned about his picks for key positions",
-  "Markets end higher as investors weigh inflation data and earnings outlooks",
-  "New study links sleep regularity to improved heart health, researchers say",
-  "FAA investigates close call after two planes cleared for same runway",
-  "Wildfire containment improves as crews brace for shifting winds this weekend",
-  "Streaming platforms raise prices again as ad tiers expand across services",
-  "Local officials warn of flooding risk as rivers rise after heavy rain",
-  "Tech layoffs slow, but hiring remains cautious heading into spring",
-  "Supreme Court to hear case on state social media laws",
-  "Electric vehicle sales slow as automakers adjust production",
-  "Housing market shows signs of cooling in major metros",
-  "Climate summit ends with agreement on renewable energy targets",
-  "Medical breakthrough in treatment of rare disease",
-  "Olympic committee announces host city for 2032 games",
-  "Major retailer reports strong holiday sales despite inflation",
-  "Scientists discover new species in deep ocean expedition",
-  "Labor union reaches tentative agreement with automakers",
-  "Federal reserve holds rates steady amid mixed economic data",
-  "Film festival opens with record number of international entries",
-  "School district adopts new curriculum for digital literacy",
-  "Nonprofit launches initiative to address food insecurity",
+/**
+ * Sample publisher content. Each headline travels with its own dek, Yahoo
+ * brand and source publisher, so a row never pairs one story's headline with
+ * another story's text. Every list that shows stories draws from here.
+ */
+interface Story {
+  title: string;
+  description: string;
+  /** Yahoo brand the story ran on (Top content "Brand" column). */
+  brand: string;
+  /** Publisher that supplied it (global search results). */
+  provider: string;
+}
+
+const STORIES: Story[] = [
+  {
+    title: "A once-in-a-decade bomb cyclone is taking shape off the West Coast",
+    description: "Forecasters expect hurricane-force gusts and heavy coastal rain as the storm deepens rapidly over the Pacific, with the worst conditions arriving late Tuesday.",
+    brand: "Yahoo News",
+    provider: "AccuWeather",
+  },
+  {
+    title: "Italian village offers $1 homes to Americans upset by the U.S. election result",
+    description: "The mayor of the Sardinian town says inquiries from the U.S. jumped overnight after the village launched a website aimed at American buyers.",
+    brand: "Yahoo Life",
+    provider: "Yahoo Life",
+  },
+  {
+    title: "‘Doomsday fish’ returns to Southern California shores for the third time this year",
+    description: "Another oarfish, a deep-sea species rarely seen near the surface, washed up near San Diego, and researchers are collecting samples to learn why.",
+    brand: "Yahoo News",
+    provider: "National Geographic",
+  },
+  {
+    title: "Winter storms forecast to hit much of U.S. as Americans gear up for Thanksgiving travel",
+    description: "Snow and freezing rain are expected across the Plains and Northeast during the busiest travel days of the year, and airlines are already waiving change fees.",
+    brand: "Yahoo News",
+    provider: "AccuWeather",
+  },
+  {
+    title: "Scientists discover new deep-sea species off the coast of New Zealand",
+    description: "Researchers are calling it a once-in-a-generation find that could reshape what we know about deep-ocean ecosystems and the creatures that live in them.",
+    brand: "Yahoo News",
+    provider: "National Geographic",
+  },
+  {
+    title: "Tech giant announces major AI partnership with leading research university",
+    description: "Shares rose in after-hours trading as investors weighed what the multi-year research deal could mean for the company's AI roadmap.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "Olympic athlete breaks long-standing world record in dramatic fashion",
+    description: "The athlete shattered a record that had stood for nearly two decades, finishing in a time few thought possible heading into the final.",
+    brand: "Yahoo Sports",
+    provider: "Yahoo Sports",
+  },
+  {
+    title: "City council votes to overhaul public transit system with electric buses",
+    description: "Local officials say the project will modernize aging infrastructure and create hundreds of construction jobs over the next three years.",
+    brand: "Yahoo News",
+    provider: "ABC News",
+  },
+  {
+    title: "Gut health may play a bigger role in memory than thought, study finds",
+    description: "Researchers say the findings, published in a peer-reviewed journal, could lead to new treatment options for patients within five to seven years.",
+    brand: "Yahoo Life",
+    provider: "Yahoo Life",
+  },
+  {
+    title: "Historic preservation group fights to save 19th-century waterfront district",
+    description: "A plan to redevelop the district faces a vote next month and has drawn support from business leaders and pushback from longtime residents.",
+    brand: "Yahoo News",
+    provider: "ABC News",
+  },
+  {
+    title: "Some Arab Americans who voted for Trump are concerned about his picks for key positions",
+    description: "Several voters in Michigan who backed him told reporters they are uneasy about some early nominations and are watching the confirmation hearings closely.",
+    brand: "Yahoo News",
+    provider: "Yahoo News",
+  },
+  {
+    title: "Markets end higher as investors weigh inflation data and earnings outlooks",
+    description: "The S&P 500 and Nasdaq both closed up after a cooler-than-expected inflation reading eased worries about another rate hike.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "New study links sleep regularity to improved heart health, researchers say",
+    description: "People who went to bed and woke up at consistent times had a lower risk of heart disease than those who slept as long on an irregular schedule.",
+    brand: "Yahoo Life",
+    provider: "Yahoo Life",
+  },
+  {
+    title: "FAA investigates close call after two planes cleared for same runway",
+    description: "Controllers ordered both aircraft to abort after spotting the conflict, and no injuries were reported among the more than 300 people on board.",
+    brand: "Yahoo News",
+    provider: "ABC News",
+  },
+  {
+    title: "Wildfire containment improves as crews brace for shifting winds this weekend",
+    description: "Firefighters have the blaze more than half contained, but forecasters warn that gusty offshore winds could push it toward evacuated neighborhoods.",
+    brand: "Yahoo News",
+    provider: "AccuWeather",
+  },
+  {
+    title: "Streaming platforms raise prices again as ad tiers expand across services",
+    description: "Ad-free plans will cost up to $3 more a month as services steer viewers toward cheaper tiers that carry commercials.",
+    brand: "Yahoo Entertainment",
+    provider: "Yahoo Entertainment",
+  },
+  {
+    title: "Local officials warn of flooding risk as rivers rise after heavy rain",
+    description: "Several rivers are expected to crest above flood stage by Thursday, and residents in low-lying areas have been told to be ready to leave.",
+    brand: "Yahoo News",
+    provider: "AccuWeather",
+  },
+  {
+    title: "Tech layoffs slow, but hiring remains cautious heading into spring",
+    description: "Job cuts across the industry fell for a third straight month, though recruiters say most companies are only backfilling essential roles.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "Supreme Court to hear case on state social media laws",
+    description: "The justices will decide whether states can limit how platforms moderate posts, a ruling that could reshape how online speech is regulated.",
+    brand: "Yahoo News",
+    provider: "Yahoo News",
+  },
+  {
+    title: "Electric vehicle sales slow as automakers adjust production",
+    description: "Several manufacturers are scaling back EV output and adding hybrid models as buyers balk at high prices and uneven access to charging.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "Housing market shows signs of cooling in major metros",
+    description: "Home prices dipped month over month in more than half of the largest U.S. cities as higher mortgage rates kept buyers on the sidelines.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "Climate summit ends with agreement on renewable energy targets",
+    description: "Nearly 200 countries agreed to triple renewable energy capacity by 2030, though critics say the deal lacks a firm timeline for phasing out fossil fuels.",
+    brand: "Yahoo News",
+    provider: "Yahoo News",
+  },
+  {
+    title: "Gene therapy halts progression of rare muscle disease in early trial",
+    description: "Most patients in the small trial saw their condition stabilize within a year, and the drugmaker plans to seek FDA approval next year.",
+    brand: "Yahoo Life",
+    provider: "Yahoo Life",
+  },
+  {
+    title: "Olympic committee shortlists three host cities for the 2036 games",
+    description: "Officials say a final decision is expected next year after inspection teams visit each finalist to review venues, transit and hotel capacity.",
+    brand: "Yahoo Sports",
+    provider: "Yahoo Sports",
+  },
+  {
+    title: "Major retailer reports strong holiday sales despite inflation",
+    description: "Same-store sales rose 6% in the holiday quarter as shoppers kept spending on gifts and groceries, sending the company's stock to a record high.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "Labor union reaches tentative agreement with automakers",
+    description: "The deal includes a 25% raise over four years and still needs to be ratified by members, who will vote over the next two weeks.",
+    brand: "Yahoo Finance",
+    provider: "ABC News",
+  },
+  {
+    title: "Federal Reserve holds rates steady amid mixed economic data",
+    description: "Policymakers left rates unchanged for a third straight meeting and signaled they want more evidence that inflation is cooling before cutting.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "Film festival opens with record number of international entries",
+    description: "Organizers say this year's lineup includes films from more than 70 countries, with several premieres already drawing early awards buzz.",
+    brand: "Yahoo Entertainment",
+    provider: "Yahoo Entertainment",
+  },
+  {
+    title: "School district adopts new curriculum for digital literacy",
+    description: "Starting next fall, students from third grade up will learn how to spot misinformation, protect their privacy and judge sources online.",
+    brand: "Yahoo News",
+    provider: "ABC News",
+  },
+  {
+    title: "Nonprofit launches initiative to address food insecurity",
+    description: "The program will fund mobile food pantries in rural counties, where the nearest grocery store can be more than 20 miles away.",
+    brand: "Yahoo Life",
+    provider: "Yahoo Life",
+  },
+  {
+    title: "Underdog team clinches playoff berth with last-second field goal",
+    description: "The 48-yard kick capped a comeback from 17 points down and sent the team to the postseason for the first time in nine years.",
+    brand: "Yahoo Sports",
+    provider: "Yahoo Sports",
+  },
+  {
+    title: "Star point guard signs record extension ahead of trade deadline",
+    description: "The five-year deal makes him the highest-paid player in franchise history and ends weeks of speculation about his future with the team.",
+    brand: "Yahoo Sports",
+    provider: "Yahoo Sports",
+  },
+  {
+    title: "Rookie goalkeeper posts third straight shutout",
+    description: "The 21-year-old has not allowed a goal in 270 minutes since being called up, the longest streak by a first-year keeper in league history.",
+    brand: "Yahoo Sports",
+    provider: "Yahoo Sports",
+  },
+  {
+    title: "Marathon organizers add heat safety measures after record temperatures",
+    description: "The race will start an hour earlier and add cooling stations every two miles after dozens of runners were treated for heat illness last year.",
+    brand: "Yahoo Sports",
+    provider: "Yahoo Sports",
+  },
+  {
+    title: "Surprise sequel tops weekend box office with $92 million debut",
+    description: "The long-delayed follow-up beat industry projections by more than $20 million, the biggest opening of the year so far.",
+    brand: "Yahoo Entertainment",
+    provider: "Yahoo Entertainment",
+  },
+  {
+    title: "Beloved sitcom cast reunites for 20th anniversary special",
+    description: "The one-hour special streams next month and includes never-before-seen footage from the show's original run.",
+    brand: "Yahoo Entertainment",
+    provider: "BuzzFeed",
+  },
+  {
+    title: "Grammy nominations spotlight a wave of first-time artists",
+    description: "More than half of the nominees in the top categories are first-timers, a shift voters say reflects how listeners now discover music.",
+    brand: "Yahoo Entertainment",
+    provider: "Yahoo Entertainment",
+  },
+  {
+    title: "15 one-pan dinners you can make in 30 minutes or less",
+    description: "From lemon-garlic salmon to sheet-pan fajitas, these weeknight recipes keep prep simple and cleanup even simpler.",
+    brand: "Yahoo Life",
+    provider: "RealSimple",
+  },
+  {
+    title: "How to declutter your closet in a single weekend",
+    description: "Professional organizers share a step-by-step plan for deciding what to keep, donate or sell without getting overwhelmed.",
+    brand: "Yahoo Life",
+    provider: "RealSimple",
+  },
+  {
+    title: "Why doctors say a 10-minute walk after meals matters",
+    description: "Short walks after eating can help steady blood sugar, and researchers say the benefits add up even at an easy pace.",
+    brand: "Yahoo Life",
+    provider: "Yahoo Life",
+  },
+  {
+    title: "Travelers are skipping big cities for these small-town getaways",
+    description: "Bookings in towns with fewer than 20,000 residents rose sharply this year as travelers looked for quieter trips and lower prices.",
+    brand: "Yahoo Life",
+    provider: "BuzzFeed",
+  },
+  {
+    title: "Rare total solar eclipse will be visible across three continents",
+    description: "Skywatchers along the path of totality will see the sun fully blocked for up to four minutes, and hotels in prime viewing areas are already filling up.",
+    brand: "Yahoo News",
+    provider: "National Geographic",
+  },
+  {
+    title: "Endangered sea turtles return to nest on restored beach",
+    description: "Volunteers counted more than 200 nests this season on a stretch of coastline that had none a decade ago, before a dune restoration project.",
+    brand: "Yahoo News",
+    provider: "National Geographic",
+  },
+  {
+    title: "Mortgage rates dip to lowest level in six months",
+    description: "The average 30-year fixed rate fell below 6.5%, giving would-be buyers a small break as the spring home-shopping season begins.",
+    brand: "Yahoo Finance",
+    provider: "Yahoo Finance",
+  },
+  {
+    title: "Heat advisory issued as temperatures climb past 100 degrees",
+    description: "Officials opened cooling centers across the region and urged residents to check on older neighbors during what could be a weeklong heat wave.",
+    brand: "Yahoo News",
+    provider: "AccuWeather",
+  },
 ];
+
+/** `count` different stories in random order — no story appears twice in one list. */
+function pickStories(count: number): Story[] {
+  return faker.helpers.shuffle([...STORIES]).slice(0, count);
+}
+
+const HEADLINE_POOL = STORIES.map((story) => story.title);
 
 const CONTENT_TYPES = ["Article", "Video", "Slideshow", "Gallery", "Live"];
 const REGIONS = ["United States", "United Kingdom", "Canada", "Australia", "Germany", "France"];
@@ -1111,24 +1398,16 @@ export function getRankedContentRows(range?: DateRangePreset, brandId?: string):
   return out;
 }
 
-const TOP_CONTENT_BRANDS = ["Yahoo News", "Yahoo Sports", "Yahoo Finance", "Yahoo Entertainment", "Yahoo Life"];
-
-const TOP_CONTENT_ROW_COUNT = 100;
-
 export function getTopContentRows(range?: DateRangePreset): TopContentRow[] {
   if (range) {
     const seed = `top-content-${range}`;
     faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
   }
-  const shuffled = faker.helpers.shuffle([...HEADLINE_POOL]);
-  const titles = Array.from({ length: TOP_CONTENT_ROW_COUNT }, (_, i) =>
-    i < shuffled.length ? shuffled[i] : faker.lorem.sentence()
-  );
-  const rows: TopContentRow[] = titles.map((contentTitle, i) => ({
+  const rows: TopContentRow[] = faker.helpers.shuffle([...STORIES]).map((story, i) => ({
     rank: i + 1,
-    contentTitle,
+    contentTitle: story.title,
     contentType: faker.helpers.arrayElement(CONTENT_TYPES),
-    brand: faker.helpers.arrayElement(TOP_CONTENT_BRANDS),
+    brand: story.brand,
     views: faker.number.int({ min: 120_000, max: 2_800_000 }),
     visitors: faker.number.int({ min: 80_000, max: 1_200_000 }),
     reach: faker.number.int({ min: 50_000, max: 900_000 }),
@@ -1276,32 +1555,6 @@ export function getFeedHeatMapData(feedId: string, range?: DateRangePreset): Fee
   return { dates, cells };
 }
 
-const FEED_ITEM_TITLES = [
-  "A once-in-a-decade bomb cyclone is taking shape off the West Coast",
-  "Italian village offers $1 homes to Americans upset by the US election result",
-  "'Doomsday fish' returns to Southern California shores for the third time this year",
-  "Winter storms forecast to hit much of U.S. as Americans gear up for Thanksgiving travel",
-  "Scientists discover new deep-sea species off the coast of New Zealand",
-  "Tech giant announces major AI partnership with leading research university",
-  "Olympic athlete breaks long-standing world record in dramatic fashion",
-  "City council votes to overhaul public transit system with electric buses",
-  "New study links gut health to improved mental performance",
-  "Historic preservation group fights to save 19th century waterfront district",
-];
-
-const FEED_ITEM_DESCS = [
-  "Scientists are calling it a once-in-a-generation discovery that could reshape our understanding of deep ocean ecosystems and the creatures that inhabit them.",
-  "Local officials say the project will modernize aging infrastructure while creating hundreds of construction jobs over the next three years.",
-  "The athlete shattered a record that had stood for nearly two decades, completing the course in a time no one thought possible heading into the competition.",
-  "Researchers say the findings, published in a peer-reviewed journal, could lead to new treatment options for patients within five to seven years.",
-  "The company's announcement sent shares surging in after-hours trading as investors responded positively to the partnership's potential market implications.",
-  "Emergency crews worked through the night to restore power to thousands of homes as temperatures dropped well below seasonal averages across the region.",
-  "Organizers say attendance broke previous records, drawing visitors from over forty countries to witness the competition's most dramatic finale in recent memory.",
-  "The proposal, which faces a vote next month, has drawn both praise from community groups and criticism from business leaders over its long-term economic impact.",
-  "Officials confirmed the recall affects units manufactured between January and June and urged consumers to stop using the product immediately pending further review.",
-  "The initiative aims to connect underserved communities with high-speed internet access, with rollout expected to begin in rural areas before expanding to urban centers.",
-];
-
 export type FeedItemStatus = "Published" | "Published with warning" | "Not published";
 
 export interface FeedRecentItem {
@@ -1318,10 +1571,10 @@ export function getFeedRecentItems(feedId: string, range?: DateRangePreset): Fee
   const seedStr = `feed-recent-${feedId}-${range ?? "default"}`;
   faker.seed(seedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
 
-  const items: FeedRecentItem[] = Array.from({ length: 25 }, () => ({
+  const items: FeedRecentItem[] = pickStories(25).map((story) => ({
     id: faker.string.uuid(),
-    title: faker.helpers.arrayElement(FEED_ITEM_TITLES),
-    description: faker.helpers.arrayElement(FEED_ITEM_DESCS),
+    title: story.title,
+    description: story.description,
     contentType: faker.helpers.arrayElement(["video", "article", "slideshow"] as const),
     status: faker.helpers.arrayElement(["Published", "Published with warning", "Not published"] as const),
     publishedAt: (() => {
@@ -1724,12 +1977,12 @@ export function getSampleContentItem(seed: string): ContentModalItem {
   const min = String(d.getMinutes()).padStart(2, "0");
   const ampm = d.getHours() >= 12 ? "PM" : "AM";
 
-  const description = faker.helpers.arrayElement(FEED_ITEM_DESCS);
+  const story = faker.helpers.arrayElement(STORIES);
   const item: ContentModalItem = {
     id: `sample-${seed}`,
-    title: faker.helpers.arrayElement(FEED_ITEM_TITLES),
-    description,
-    snippet: description,
+    title: story.title,
+    description: story.description,
+    snippet: story.description,
     contentType: faker.helpers.arrayElement(["video", "article", "slideshow"] as const),
     thumbnailSeed: faker.number.int({ min: 100, max: 999 }),
     publishedAt: `${mon} ${d.getDate()}, ${d.getFullYear()} at ${h}:${min} ${ampm} PT`,
@@ -1757,12 +2010,15 @@ export function getIssueDetailData(
   type: "published_with_warning" | "not_published",
   range?: DateRangePreset,
 ): IssueDetailData {
+  // The row that was clicked in Issues detected, so the name and volume match it.
+  const row = getIssuesDetected(range).find((r) => r.id === id);
+
   // Stable fields — seeded by id only so they don't change when range changes
   const seedStr = `issue-detail-${id}`;
   faker.seed(seedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
 
-  const name = faker.helpers.arrayElement(ISSUE_POOL);
-  const contentVolume = faker.number.int({ min: 500, max: 5500 });
+  const name = row?.issue ?? faker.helpers.arrayElement(ISSUE_POOL);
+  const contentVolume = row?.volume ?? faker.number.int({ min: 500, max: 5500 });
   const ldDate = faker.date.recent({ days: 30, refDate: new Date(2026, 0, 20) });
   const lastDiscovered = `${ldDate.getMonth() + 1}/${ldDate.getDate()}/${ldDate.getFullYear()}`;
 
@@ -1811,7 +2067,7 @@ export function getIssueContentItems(
   const seedStr = `issue-content-${id}-${range ?? "default"}`;
   faker.seed(seedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
 
-  const items: IssueContentItem[] = Array.from({ length: 25 }, () => {
+  const items: IssueContentItem[] = pickStories(25).map((story) => {
     const d = faker.date.recent({ days: 7, refDate: new Date(2026, 0, 20) });
     const mon = d.toLocaleString("en-US", { month: "short" });
     const h = d.getHours() % 12 || 12;
@@ -1819,8 +2075,8 @@ export function getIssueContentItems(
     const ampm = d.getHours() >= 12 ? "PM" : "AM";
     return {
       id: faker.string.uuid(),
-      title: faker.helpers.arrayElement(FEED_ITEM_TITLES),
-      description: faker.helpers.arrayElement(FEED_ITEM_DESCS),
+      title: story.title,
+      description: story.description,
       contentType: faker.helpers.arrayElement(["video", "article", "slideshow"] as const),
       thumbnailSeed: faker.number.int({ min: 100, max: 999 }),
       publishedAt: `${mon} ${d.getDate()}, ${d.getFullYear()} at ${h}:${min} ${ampm} PT`,
@@ -1832,11 +2088,6 @@ export function getIssueContentItems(
 }
 
 // ─── Global search ────────────────────────────────────────────────────────────
-
-const SEARCH_PROVIDERS = [
-  "Yahoo News", "Yahoo Sports", "Yahoo Finance", "Yahoo Entertainment", "Yahoo Life",
-  "BuzzFeed", "AccuWeather", "RealSimple", "National Geographic", "ABC News",
-];
 
 export interface SearchableContentItem {
   id: string;
@@ -1854,7 +2105,7 @@ export function getSearchableContentItems(): SearchableContentItem[] {
   const seedStr = "global-search-index";
   faker.seed(seedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
 
-  const items: SearchableContentItem[] = Array.from({ length: 40 }, () => {
+  const items: SearchableContentItem[] = pickStories(40).map((story) => {
     const d = faker.date.recent({ days: 14, refDate: new Date(2026, 0, 20) });
     const mon = d.toLocaleString("en-US", { month: "short" });
     const h = d.getHours() % 12 || 12;
@@ -1862,13 +2113,13 @@ export function getSearchableContentItems(): SearchableContentItem[] {
     const ampm = d.getHours() >= 12 ? "PM" : "AM";
     return {
       id: faker.string.uuid(),
-      title: faker.helpers.arrayElement(FEED_ITEM_TITLES),
-      description: faker.helpers.arrayElement(FEED_ITEM_DESCS),
+      title: story.title,
+      description: story.description,
       contentType: faker.helpers.arrayElement(["video", "article", "slideshow"] as const),
       thumbnailSeed: faker.number.int({ min: 100, max: 999 }),
       publishedAt: `${mon} ${d.getDate()}, ${d.getFullYear()} at ${h}:${min} ${ampm} PT`,
       status: faker.helpers.arrayElement(["Published", "Published with warning", "Not published"] as const),
-      provider: faker.helpers.arrayElement(SEARCH_PROVIDERS),
+      provider: story.provider,
     };
   });
 
