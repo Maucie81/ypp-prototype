@@ -125,10 +125,12 @@ export function KpiCard({
 }: KpiCardProps) {
   const isPrimary = variant === "primary";
   const showSparkline = isPrimary && Boolean(sparklineData?.length);
+  const interactiveClassName = href
+    ? " transition-colors duration-150 hover:bg-[#f0f3f5] hover:border-[#cdd3da] cursor-pointer"
+    : "";
 
   if (isPrimary) {
-    const cardClassName =
-      "relative flex min-h-[112px] flex-col items-stretch rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] p-6 transition-colors duration-150 hover:bg-[#f0f3f5] hover:border-[#cdd3da] cursor-pointer";
+    const cardClassName = `relative flex min-h-[112px] flex-col items-stretch rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] p-6${interactiveClassName}`;
     const content = (
       <div className="flex flex-col gap-0 h-full">
         <div className="flex min-w-0 flex-col gap-4 pb-4">
@@ -142,7 +144,9 @@ export function KpiCard({
               </p>
               <InfoTooltip label={label} helperText={helperText ?? ""} />
             </div>
-            <Icon name={ChevronRight} size="sm" variant="outline" className="h-3.5 w-3.5 shrink-0 text-[#6a6a6a]" />
+            {href ? (
+              <Icon name={ChevronRight} size="sm" variant="outline" className="h-3.5 w-3.5 shrink-0 text-[#6a6a6a]" />
+            ) : null}
           </div>
           <div className="flex items-end gap-2">
             <p className="font-yahoo-product-sans text-[24px] font-bold leading-[1] text-[#232a31]">
@@ -172,11 +176,10 @@ export function KpiCard({
   }
 
   // Secondary variant — Figma: Secondary Chip_Small
-  const cardClassName =
-    "relative flex flex-col rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-5 py-4 transition-colors duration-150 hover:bg-[#f0f3f5] hover:border-[#cdd3da] cursor-pointer";
+  const cardClassName = `relative flex flex-col rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-5 py-4${interactiveClassName}`;
   const content = (
     <div className="flex flex-col gap-4">
-      {/* Header row: icon + label + info + chevron */}
+      {/* Header row: icon + label + info + chevron (linked cards only) */}
       <div className="flex items-center h-8 pb-2 border-b border-[#e0e4e9]">
         <div className="flex flex-1 items-center gap-2 min-w-0">
           {icon && (
@@ -187,7 +190,9 @@ export function KpiCard({
           </p>
           <InfoTooltip label={label} helperText={helperText ?? ""} />
         </div>
-        <Icon name={ChevronRight} size="sm" variant="outline" className="h-3.5 w-3.5 shrink-0 text-[#6a6a6a] ml-2" />
+        {href ? (
+          <Icon name={ChevronRight} size="sm" variant="outline" className="h-3.5 w-3.5 shrink-0 text-[#6a6a6a] ml-2" />
+        ) : null}
       </div>
 
       {/* Data rows */}
