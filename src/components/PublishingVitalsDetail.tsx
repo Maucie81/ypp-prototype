@@ -359,7 +359,7 @@ export function PublishingVitalsDetail({
         <IssuesTable
           rows={issueVisible}
           onBadgeClick={(row) => {
-            const item = getSampleContentItem(row.id);
+            const item = { ...getSampleContentItem(row.id), issueName: row.issue };
             if (row.type === "published_with_warning") setWarnModal(item);
             else setFailModal(item);
           }}

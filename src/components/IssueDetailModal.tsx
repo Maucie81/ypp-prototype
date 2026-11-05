@@ -167,16 +167,18 @@ function ExcerptBlock({
       )}
 
       {issue.excerptType === "image" ? (
-        <div className="relative flex h-[220px] w-full items-center justify-center rounded-[8px] bg-[#f3f3f3]">
-          <Icon
-            name={ImageIcon}
-            size="lg"
-            variant="outline"
-            className="size-10 text-[#8a9299]"
-          />
+        <div className="h-[220px] w-full overflow-hidden rounded-[8px] bg-[#f3f3f3]">
+          {issue.excerptImage && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={issue.excerptImage.src}
+              alt={issue.excerptImage.alt}
+              className="h-full w-full object-cover"
+            />
+          )}
         </div>
       ) : (
-        <p className="font-yahoo-product-sans text-[14px] leading-6 text-[#464e56]">
+        <p className="whitespace-pre-line font-yahoo-product-sans text-[14px] leading-6 text-[#464e56]">
           {issue.flaggedTerms && issue.flaggedTerms.length > 0 ? (
             <HighlightedText
               text={issue.excerptContent}
@@ -421,7 +423,13 @@ function MetadataRow({ item }: { item: ContentModalItem }) {
 
 // ── Content card (thumbnail + metadata) ──────────────────────────────────────
 
-function ContentCard({ item }: { item: ContentModalItem }) {
+function ContentCard({
+  item,
+  thumbnailMissing = false,
+}: {
+  item: ContentModalItem;
+  thumbnailMissing?: boolean;
+}) {
   const thumbUrl = `https://picsum.photos/seed/${item.thumbnailSeed}/163/104`;
 
   const statusVariant =
@@ -435,15 +443,25 @@ function ContentCard({ item }: { item: ContentModalItem }) {
     <div className="rounded-[8px] bg-[#f5f5f5] px-6 py-6">
       <div className="flex gap-6">
         {/* Thumbnail */}
-        <div className="h-[104px] w-[163px] shrink-0 overflow-hidden rounded-[4px] bg-[#e0e4e9]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={thumbUrl}
-            alt=""
-            width={163}
-            height={104}
-            className="h-full w-full object-cover"
-          />
+        <div className="flex h-[104px] w-[163px] shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-[#e0e4e9]">
+          {thumbnailMissing ? (
+            <Icon
+              name={ImageIcon}
+              size="lg"
+              variant="outline"
+              className="size-8 text-[#8a9299]"
+              aria-label="No image"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={thumbUrl}
+              alt=""
+              width={163}
+              height={104}
+              className="h-full w-full object-cover"
+            />
+          )}
         </div>
 
         {/* Details */}
@@ -515,7 +533,7 @@ export function IssueDetailModalCard({
       {/* ── Scrollable body ── */}
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 pb-6">
         {/* Content card */}
-        <ContentCard item={item} />
+        <ContentCard item={item} thumbnailMissing={data.thumbnailMissing} />
 
         {/* Metadata row */}
         <MetadataRow item={item} />

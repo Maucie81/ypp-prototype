@@ -1291,6 +1291,12 @@ const STORIES: Story[] = [
 ];
 
 /** `count` different stories in random order — no story appears twice in one list. */
+/** "High tragedy score" only ever lists these, so a sea-turtle story is never flagged as tragic. */
+const TRAGEDY_ISSUE_ID = "high-tragedy-score";
+const TRAGIC_STORIES = STORIES.filter((story) =>
+  ["deaths", "crash", "killed"].includes(story.restricted?.word ?? ""),
+);
+
 function pickStories(count: number): Story[] {
   return faker.helpers.shuffle([...STORIES]).slice(0, count);
 }
@@ -1665,6 +1671,8 @@ export interface IssueModalItem {
   excerptType: IssueExcerptType;
   /** Raw text/code content. Empty string = no excerpt shown. */
   excerptContent: string;
+  /** The picture shown when excerptType is "image". */
+  excerptImage?: { src: string; alt: string };
   /** Label above the excerpt block. Defaults to "Content excerpt". */
   excerptLabel?: string;
   /** Substrings of excerptContent to highlight in the issue accent color. */
@@ -1678,6 +1686,8 @@ export interface IssueModalData {
   modalTitle: string;
   issues: IssueModalItem[];
   footerType: IssueFooterType;
+  /** The issue is that the item has no image, so its card shows a placeholder. */
+  thumbnailMissing?: boolean;
 }
 
 /** Unified lightweight type for passing content items into modals. */
@@ -1690,6 +1700,8 @@ export interface ContentModalItem {
   thumbnailSeed: number;
   publishedAt: string;
   status?: string;
+  /** The "Issues detected" issue this item was opened from; its pop-up explains that issue. */
+  issueName?: string;
 }
 
 // ─── Issue detail page data ───────────────────────────────────────────────────
@@ -1818,18 +1830,244 @@ function embedExcerpt(item: ContentModalItem): string {
   );
 }
 
+function articleSlug(item: ContentModalItem): string {
+  return slugify(item.title).split("-").slice(0, 6).join("-");
+}
+
+function enclosureTag(item: ContentModalItem): string {
+  return `<enclosure url="https://example.com/images/${articleSlug(item)}.jpg" length="0" type="image/jpeg"/>`;
+}
+
 /** The item's own feed entry, showing where the missing required field belongs. */
-function schemaExcerpt(item: ContentModalItem): string {
-  const slug = slugify(item.title).split("-").slice(0, 6).join("-");
+function schemaExcerpt(item: ContentModalItem, pubDate: string = _FAIL_PUBDATE): string {
+  const slug = articleSlug(item);
   const teaser = item.description.split(" ").slice(0, 8).join(" ");
   return (
     `<item> <title>${item.title}</title> <link>https://example.com/${slug}</link> <description>${teaser}...</description>` +
-    _FAIL_PUBDATE +
-    `<guid>${slug}-001</guid> <enclosure url="https://example.com/images/${slug}.jpg" length="0" type="image/jpeg"/> </item>`
+    pubDate +
+    `<guid>${slug}-001</guid> ${enclosureTag(item)} </item>`
   );
 }
 
+// ─── Pop-ups for the named issues in "Issues detected" ───────────────────────
+
+const _MALFORMED_PUBDATE = "<pubDate>January 14th, 2026</pubDate>";
+const _STALE_LASTMOD = "<lastmod>2025-10-02T08:00:00Z</lastmod>";
+const _INGEST_DROP_LINE = "Jan 16, 2026: 212 items ingested (expected about 1,240)";
+const _TECHNICAL_GUIDELINES = "technical guidelines";
+
+const WARNING_OUTCOME = "The content was published, but its distribution may be limited.";
+const FAILED_OUTCOME = "As a result, this item was rejected and the content wasn't published.";
+
+interface NamedIssueCopy {
+  /** What went wrong; the published or rejected outcome is added after it. */
+  cause: string;
+  /** Replaces WARNING_OUTCOME where limited distribution isn't the real effect. */
+  warningOutcome?: string;
+  actionText: string;
+  actionLinkText?: string;
+  footerType: IssueFooterType;
+  thumbnailMissing?: boolean;
+  excerpt: (
+    item: ContentModalItem,
+  ) => Pick<IssueModalItem, "excerptType" | "excerptContent" | "excerptLabel" | "flaggedTerms">;
+}
+
+const NAMED_ISSUES: Record<string, NamedIssueCopy> = {
+  "High tragedy score": {
+    cause:
+      "Our system gave this item a high tragedy score because it describes deaths, disasters or other distressing events, which may conflict with our brand safety guidelines.",
+    actionText:
+      "Review this content and its category metadata against our brand safety guidelines. If you believe the system made a mistake, please contact our support team.",
+    actionLinkText: "brand safety guidelines",
+    footerType: "link",
+    excerpt: (item) => {
+      const restricted = findStory(item.title)?.restricted;
+      return {
+        excerptType: "text",
+        excerptContent: restricted?.excerpt ?? item.description,
+        excerptLabel: "Content excerpt",
+        flaggedTerms: restricted ? [restricted.word] : undefined,
+      };
+    },
+  },
+  "Missing required image field": {
+    cause: "This item is missing the image field that Yahoo surfaces need to display it.",
+    actionText:
+      "Add a valid image to the item's enclosure field. Review our technical guidelines for supported image hosts and formats.",
+    actionLinkText: _TECHNICAL_GUIDELINES,
+    footerType: "button",
+    thumbnailMissing: true,
+    excerpt: (item) => ({
+      excerptType: "code",
+      excerptContent: schemaExcerpt(item),
+      excerptLabel: "Required schema format",
+      flaggedTerms: [enclosureTag(item)],
+    }),
+  },
+  "Invalid canonical URL format": {
+    cause:
+      "The canonical URL for this item doesn't match the expected format, which can affect search indexing and duplicate detection.",
+    actionText:
+      "Use a URL that starts with https:// and has no query parameters or fragments. Review our technical guidelines for the expected format.",
+    actionLinkText: _TECHNICAL_GUIDELINES,
+    footerType: "button",
+    excerpt: (item) => {
+      const badUrl = `http://example.com/${articleSlug(item)}?utm_source=feed#top`;
+      return {
+        excerptType: "code",
+        excerptContent: `<link rel="canonical" href="${badUrl}"/>`,
+        excerptLabel: "Content excerpt",
+        flaggedTerms: [badUrl],
+      };
+    },
+  },
+  "Stale sitemap detected": {
+    cause:
+      "The sitemap that lists this item hasn't been updated within the expected refresh window, so we may not have found this item on time.",
+    warningOutcome: "The content was published, but it may have taken longer to reach readers.",
+    actionText:
+      "Refresh your sitemap and make sure its lastmod dates are accurate. Review our technical guidelines for how often to update it.",
+    actionLinkText: _TECHNICAL_GUIDELINES,
+    footerType: "button",
+    excerpt: (item) => ({
+      excerptType: "code",
+      excerptContent: `<url> <loc>https://example.com/${articleSlug(item)}</loc> ${_STALE_LASTMOD} </url>`,
+      excerptLabel: "Content excerpt",
+      flaggedTerms: [_STALE_LASTMOD],
+    }),
+  },
+  "High 5xx response rate": {
+    cause:
+      "Your server returned repeated 5xx errors when we requested this item, which can point to instability in your CMS or CDN.",
+    warningOutcome: "The content was published, but its images or updates may be incomplete.",
+    actionText:
+      "Check your server logs and CDN configuration, and fix the cause of the errors. Review our technical guidelines for retry and caching recommendations.",
+    actionLinkText: _TECHNICAL_GUIDELINES,
+    footerType: "button",
+    excerpt: (item) => {
+      const url = `https://example.com/${articleSlug(item)}`;
+      return {
+        excerptType: "code",
+        excerptContent: [
+          `09:00:04 GET ${url} 503 Service Unavailable`,
+          `09:05:04 GET ${url} 503 Service Unavailable`,
+          `09:10:04 GET ${url} 502 Bad Gateway`,
+        ].join("\n"),
+        excerptLabel: "Response log",
+        flaggedTerms: ["503 Service Unavailable", "502 Bad Gateway"],
+      };
+    },
+  },
+  "Schema validation failed": {
+    cause:
+      "This item doesn't match the required schema because its publication date is in the wrong format.",
+    actionText:
+      "Use a date in the format Wed, 14 Jan 2026 09:00:00 GMT. Review our technical guidelines for required fields and data types.",
+    actionLinkText: _TECHNICAL_GUIDELINES,
+    footerType: "button",
+    excerpt: (item) => ({
+      excerptType: "code",
+      excerptContent: schemaExcerpt(item, _MALFORMED_PUBDATE),
+      excerptLabel: "Content excerpt",
+      flaggedTerms: [_MALFORMED_PUBDATE],
+    }),
+  },
+  "Unexpected drop in items ingested": {
+    cause:
+      "The feed this item came from delivered far fewer items than usual, which can point to a pipeline failure or a change in the source feed.",
+    warningOutcome: "This item was published, but other items from the feed may be missing.",
+    actionText:
+      "Confirm your CMS is exporting all items and your feed endpoint returns the expected count. Check for any recent configuration changes.",
+    footerType: "link",
+    excerpt: () => ({
+      excerptType: "code",
+      excerptContent: [
+        "Jan 14, 2026: 1,248 items ingested",
+        "Jan 15, 2026: 1,231 items ingested",
+        _INGEST_DROP_LINE,
+      ].join("\n"),
+      excerptLabel: "Ingestion log",
+      flaggedTerms: [_INGEST_DROP_LINE],
+    }),
+  },
+};
+
+/** The pop-up for the issue the item was opened from, if it was opened from a named issue. */
+function namedIssueData(
+  item: ContentModalItem,
+  issueType: IssueModalData["issueType"],
+): IssueModalData | null {
+  const copy = item.issueName ? NAMED_ISSUES[item.issueName] : undefined;
+  if (!item.issueName || !copy) return null;
+
+  const failed = issueType === "failed";
+  const outcome = failed ? FAILED_OUTCOME : (copy.warningOutcome ?? WARNING_OUTCOME);
+  return {
+    issueType,
+    variant: "single",
+    modalTitle: item.issueName,
+    thumbnailMissing: copy.thumbnailMissing,
+    issues: [{
+      id: `${item.id}-${slugify(item.issueName)}`,
+      title: failed ? "Failed to publish" : "Warning",
+      description: `${copy.cause} ${outcome}`,
+      actionText: copy.actionText,
+      actionLinkText: copy.actionLinkText,
+      ...copy.excerpt(item),
+    }],
+    footerType: copy.footerType,
+  };
+}
+
+const IMAGE_SPEC_ACTION = {
+  actionText:
+    "Review our image specifications and make sure your content meets our guidelines for resolution.",
+  actionLinkText: "image specifications",
+};
+
+const LOW_QUALITY_COPY: Record<
+  FeedContentType,
+  {
+    modalTitle: string;
+    subject: string;
+    description: string;
+    actionText: string;
+    actionLinkText: string;
+  }
+> = {
+  video: {
+    modalTitle: "Low video quality",
+    subject: "video frame",
+    description:
+      "This video appears to have low technical quality, such as low bitrate or resolution. The content was published, but its distribution may be limited.",
+    actionText:
+      "Review our video specifications and make sure your content meets our guidelines for bitrate and resolution.",
+    actionLinkText: "video specifications",
+  },
+  article: {
+    modalTitle: "Low image quality",
+    subject: "article image",
+    description:
+      "The image in this article appears to have low technical quality, such as low resolution. The content was published, but its distribution may be limited.",
+    ...IMAGE_SPEC_ACTION,
+  },
+  slideshow: {
+    modalTitle: "Low image quality",
+    subject: "slideshow image",
+    description:
+      "An image in this slideshow appears to have low technical quality, such as low resolution. The content was published, but its distribution may be limited.",
+    ...IMAGE_SPEC_ACTION,
+  },
+};
+
+/** Matches the 3.2:1 excerpt frame, small enough that the picture visibly softens when scaled up. */
+const LOW_QUALITY_IMAGE_SIZE = "192/60";
+
 export function getContentIssueWarning(item: ContentModalItem): IssueModalData {
+  const named = namedIssueData(item, "warning");
+  if (named) return named;
+
   const itemId = item.id;
   const hash = _quickHash(itemId);
   const restricted = findStory(item.title)?.restricted;
@@ -1895,21 +2133,26 @@ export function getContentIssueWarning(item: ContentModalItem): IssueModalData {
     };
   }
 
-  // "Low image quality": single, image placeholder, button footer
+  // "Low image quality" ("Low video quality" on videos): single, the item's own
+  // picture at low resolution, button footer
+  const lowQuality = LOW_QUALITY_COPY[item.contentType];
   return {
     issueType: "warning",
     variant: "single",
-    modalTitle: "Low image quality",
+    modalTitle: lowQuality.modalTitle,
     issues: [{
       id: `${itemId}-warn-1`,
       title: "Warning",
-      description:
-        "This video appears to have low technical quality, such as low bitrate or resolution. The content was published, but its distribution may be limited.",
-      actionText:
-        "Review our video specifications and make sure your content meets our guidelines for bitrate and resolution.",
-      actionLinkText: "video specifications",
+      description: lowQuality.description,
+      actionText: lowQuality.actionText,
+      actionLinkText: lowQuality.actionLinkText,
       excerptType: "image",
       excerptContent: "",
+      excerptImage: {
+        // Same seed as the content card's thumbnail, requested far below display size.
+        src: `https://picsum.photos/seed/${item.thumbnailSeed}/${LOW_QUALITY_IMAGE_SIZE}`,
+        alt: `Low-resolution ${lowQuality.subject} from "${item.title}"`,
+      },
       excerptLabel: "Content excerpt",
     }],
     footerType: "button",
@@ -1917,6 +2160,9 @@ export function getContentIssueWarning(item: ContentModalItem): IssueModalData {
 }
 
 export function getContentIssueFailure(item: ContentModalItem): IssueModalData {
+  const named = namedIssueData(item, "failed");
+  if (named) return named;
+
   const itemId = item.id;
   const variant = _quickHash(`fail-${itemId}`) % 3;
 
@@ -2010,7 +2256,7 @@ export function getSampleContentItem(seed: string): ContentModalItem {
   const min = String(d.getMinutes()).padStart(2, "0");
   const ampm = d.getHours() >= 12 ? "PM" : "AM";
 
-  const story = faker.helpers.arrayElement(STORIES);
+  const story = faker.helpers.arrayElement(seed === TRAGEDY_ISSUE_ID ? TRAGIC_STORIES : STORIES);
   const item: ContentModalItem = {
     id: `sample-${seed}`,
     title: story.title,
@@ -2100,7 +2346,8 @@ export function getIssueContentItems(
   const seedStr = `issue-content-${id}-${range ?? "default"}`;
   faker.seed(seedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
 
-  const items: IssueContentItem[] = pickStories(25).map((story) => {
+  const stories = id === TRAGEDY_ISSUE_ID ? TRAGIC_STORIES : pickStories(25);
+  const items: IssueContentItem[] = stories.map((story) => {
     const d = faker.date.recent({ days: 7, refDate: new Date(2026, 0, 20) });
     const mon = d.toLocaleString("en-US", { month: "short" });
     const h = d.getHours() % 12 || 12;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { Icon } from "@yahoo/uds";
-import { Article, VideoCamera, ImageGallery } from "@yahoo/uds-icons";
+import { Article, VideoCamera, ImageGallery, Image as ImageIcon } from "@yahoo/uds-icons";
 import { FilterChip } from "@/components/FilterChip";
 import { DateFilter, type DateFilterValue } from "@/components/filters/DateFilter";
 import { PublishStatusLabel, type PublishStatusLabelVariant } from "@/components/PublishStatusLabel";
@@ -123,11 +123,13 @@ function ContentTypeIcon({ type }: { type: FeedContentType }) {
 function IssueContentRow({
   item,
   badgeVariant,
+  thumbnailMissing = false,
   onRowClick,
   onBadgeClick,
 }: {
   item: IssueContentItem;
   badgeVariant: PublishStatusLabelVariant;
+  thumbnailMissing?: boolean;
   onRowClick?: (item: IssueContentItem) => void;
   onBadgeClick?: (item: IssueContentItem) => void;
 }) {
@@ -142,15 +144,25 @@ function IssueContentRow({
       onClick={() => onRowClick?.(item)}
     >
       {/* Thumbnail */}
-      <div className="h-[104px] w-[163px] shrink-0 overflow-hidden rounded-[4px] bg-[#e0e4e9]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={thumbUrl}
-          alt=""
-          width={163}
-          height={104}
-          className="h-full w-full object-cover"
-        />
+      <div className="flex h-[104px] w-[163px] shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-[#e0e4e9]">
+        {thumbnailMissing ? (
+          <Icon
+            name={ImageIcon}
+            size="lg"
+            variant="outline"
+            className="size-8 text-[#8a9299]"
+            aria-label="No image"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumbUrl}
+            alt=""
+            width={163}
+            height={104}
+            className="h-full w-full object-cover"
+          />
+        )}
       </div>
 
       {/* Details */}
@@ -351,9 +363,10 @@ export function IssueDetailPage({
               key={item.id}
               item={item}
               badgeVariant={contentBadgeVariant}
+              thumbnailMissing={detail.name === "Missing required image field"}
               onRowClick={(i) => setContentModal({ ...i, snippet: i.description })}
               onBadgeClick={(i) => {
-                const modalItem = { ...i, snippet: i.description };
+                const modalItem = { ...i, snippet: i.description, issueName: detail.name };
                 if (type === "warning") setWarnModal(modalItem);
                 else setFailModal(modalItem);
               }}

@@ -472,7 +472,7 @@ export default function FeedHealthDetailPage({
           rows={visibleIssues}
           onBadgeClick={(row) =>
             openIssueModal(
-              getSampleContentItem(row.id),
+              { ...getSampleContentItem(row.id), issueName: row.issue },
               row.type === "published_with_warning" ? "warning" : "failure",
             )
           }
