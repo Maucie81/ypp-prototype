@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FilterChip } from "@/components/FilterChip";
 import { DateFilter, dateChipLabel } from "@/components/filters/DateFilter";
 import {
@@ -63,6 +63,24 @@ export const OPTIONS: Record<MultiFilterKey, MultiSelectOption[]> = {
   ],
 };
 
+/** Overview's order is the standard; other pages add their extra filters after it. */
+const OVERVIEW_FILTERS: { key: MultiFilterKey; label: string }[] = [
+  { key: "brands", label: "Brands" },
+  { key: "regions", label: "Regions" },
+  { key: "contentTypes", label: "Content types" },
+  { key: "categories", label: "Categories" },
+  { key: "licenses", label: "Licenses" },
+];
+
+const FILTERS_BY_VARIANT: Record<FilterBarVariant, { key: MultiFilterKey; label: string }[]> = {
+  overview: OVERVIEW_FILTERS,
+  contentPerformance: [
+    ...OVERVIEW_FILTERS,
+    { key: "granularity", label: "Granularity" },
+    { key: "devices", label: "Devices" },
+  ],
+};
+
 export function FilterBar({ variant }: { variant: FilterBarVariant }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const timeFilter = useTimeFilter();
@@ -79,27 +97,7 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
     granularity: [],
   });
 
-  const filters = useMemo(() => {
-    if (variant === "overview") {
-      return [
-        { key: "brands" as const, label: "Brands" },
-        { key: "regions" as const, label: "Regions" },
-        { key: "contentTypes" as const, label: "Content types" },
-        { key: "categories" as const, label: "Categories" },
-        { key: "licenses" as const, label: "Licenses" },
-      ];
-    }
-
-    return [
-      { key: "granularity" as const, label: "Granularity" },
-      { key: "licenses" as const, label: "Licenses" },
-      { key: "categories" as const, label: "Categories" },
-      { key: "contentTypes" as const, label: "Content types" },
-      { key: "regions" as const, label: "Regions" },
-      { key: "devices" as const, label: "Devices" },
-      { key: "brands" as const, label: "Brands" },
-    ];
-  }, [variant]);
+  const filters = FILTERS_BY_VARIANT[variant];
 
   function toggleId(key: MultiFilterKey, id: string) {
     setSelected((prev) => {
