@@ -1576,11 +1576,17 @@ export function getFeedHeatMapData(feedId: string, range?: DateRangePreset): Fee
   const seedStr = `feed-heatmap-${feedId}-${range ?? "default"}`;
   faker.seed(seedStr.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
 
-  const days = range === "last7" ? 7 : range === "last14" ? 14 : range === "last24h" ? 1 : 11;
-  const baseDate = new Date(2026, 0, 14); // Jan 14, 2026
+  const today = new Date();
+  const days =
+    range === "last30" ? 30
+    : range === "last14" ? 14
+    : range === "last24h" ? 1
+    : range === "mtd" ? today.getDate()
+    : 7;
+  // The window ends today, so "Last 30 days" really is the last 30 days.
   const dates: string[] = Array.from({ length: days }, (_, i) => {
-    const d = new Date(baseDate);
-    d.setDate(baseDate.getDate() + i);
+    const d = new Date(today);
+    d.setDate(today.getDate() - (days - 1 - i));
     return `${d.getMonth() + 1}/${d.getDate()}`;
   });
 
