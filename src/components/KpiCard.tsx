@@ -4,9 +4,8 @@ import React, { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Icon } from "@yahoo/uds";
-import { ChevronRight, Info } from "@yahoo/uds-icons";
+import { Info } from "@yahoo/uds-icons";
 import { DeltaArrowIcon } from "./DeltaArrowIcon";
-import { TrendingIcon } from "./TrendingIcon";
 import { KpiSparkline } from "./KpiSparkline";
 
 type Trend = "up" | "down" | "neutral";
@@ -25,40 +24,21 @@ export interface KpiCardProps {
   href?: string;
 }
 
+/** Outlined pill with a straight arrow: muted green up, muted red down, grey flat. */
 function DeltaChip({ delta, trend }: { delta: string; trend: Trend }) {
-  const isUp = trend === "up";
-  const isDown = trend === "down";
-
-  const borderColor = isUp
-    ? "border-[#56C470]"
-    : isDown
-      ? "border-[#FF4D52]"
-      : "border-[#828a93]";
-
-  const iconColor = isUp
-    ? "text-[#56C470]"
-    : isDown
-      ? "text-[#FF4D52]"
-      : "text-[#828a93]";
-
-  const textColor = "text-[#464e56]";
-
-  const icon =
-    trend === "up" ? (
-      <TrendingIcon direction="up" className={iconColor} />
-    ) : trend === "down" ? (
-      <TrendingIcon direction="down" className={iconColor} />
-    ) : (
-      <DeltaArrowIcon direction="right" className={`h-3 w-3 shrink-0 ${iconColor}`} />
-    );
+  const borderColor =
+    trend === "up" ? "border-[#7cbf9c]" : trend === "down" ? "border-[#e5949e]" : "border-[#c8cdd2]";
+  const iconColor =
+    trend === "up" ? "text-[#1f7a4d]" : trend === "down" ? "text-[#c62a3d]" : "text-[#828a93]";
+  const direction = trend === "up" ? "up" : trend === "down" ? "down" : "right";
 
   return (
     <span
-      className={`inline-flex min-h-[28px] items-center justify-center gap-1 overflow-hidden rounded-full border bg-white px-3 py-1 ${borderColor}`}
+      className={`inline-flex h-[26px] items-center justify-center gap-1 overflow-hidden rounded-full border bg-white px-2.5 ${borderColor}`}
     >
-      {icon}
-      <span className={`font-yahoo-product-sans text-[14px] font-medium leading-5 ${textColor}`}>
-        {delta}
+      <DeltaArrowIcon direction={direction} className={`h-3 w-3 shrink-0 ${iconColor}`} />
+      <span className="font-yahoo-product-sans text-[14px] font-normal leading-5 text-[#464e56]">
+        {delta.replace(/^[+-]/, "")}
       </span>
     </span>
   );
@@ -158,34 +138,27 @@ export function KpiCard({
 }: KpiCardProps) {
   const isPrimary = variant === "primary";
   const showSparkline = isPrimary && Boolean(sparklineData?.length);
-  // Only linked cards (Overview) get the hover state and chevron; static cards (Feed health) stay plain.
+  // Only linked cards (Overview) get a hover state; static cards (Feed health) stay plain.
   const interactiveClassName = href
-    ? " transition-colors duration-150 hover:bg-[#f0f3f5] hover:border-[#cdd3da] cursor-pointer"
+    ? " transition-colors duration-150 hover:bg-[#f5f8fa] hover:border-[#cdd3da] cursor-pointer"
     : "";
   const cardClassName =
-    "relative flex min-h-[112px] items-stretch rounded-[8px] border border-[#e0e4e9] bg-[#fafafa] p-6" +
+    "relative flex min-h-[112px] items-stretch rounded-[8px] border border-[#e0e4e9] bg-white p-6" +
     interactiveClassName;
   const secondaryCardClassName =
-    "relative flex min-h-[104px] flex-col justify-between gap-3 rounded-[8px] border border-[#e0e4e9] bg-[#fafafa] p-6" +
+    "relative flex min-h-[112px] flex-col justify-between gap-4 rounded-[8px] border border-[#e0e4e9] bg-white p-6" +
     interactiveClassName;
-
-  const chevronEl = href ? (
-    <span className="absolute right-4 top-4 inline-flex size-6 items-center justify-center rounded-full border border-[#e0e4e9] bg-transparent">
-      <Icon name={ChevronRight} size="sm" variant="outline" className="w-2.5 h-2.5 text-[#6a6a6a]" />
-    </span>
-  ) : null;
+  const labelClassName = "font-yahoo-product-sans text-[16px] font-normal leading-5 text-[#232a31]";
 
   if (isPrimary) {
     const content = (
       <>
-        <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-col justify-between gap-6">
           <div className="flex items-center gap-2">
-            <p className="font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#464e56]">
-              {label}
-            </p>
+            <p className={labelClassName}>{label}</p>
             <InfoTooltip label={label} helperText={helperText ?? ""} />
           </div>
-          <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <p className="font-yahoo-product-sans text-[28px] font-bold leading-8 text-[#232a31]">
               {value}
             </p>
@@ -193,11 +166,10 @@ export function KpiCard({
           </div>
         </div>
         {showSparkline && sparklineData ? (
-          <div className="ml-4 flex min-w-0 flex-1 items-end overflow-hidden">
-            <KpiSparkline data={sparklineData} hideGradient />
+          <div className="ml-6 flex min-w-0 flex-1 items-end overflow-hidden">
+            <KpiSparkline data={sparklineData} height={64} hideGradient />
           </div>
         ) : null}
-        {chevronEl}
       </>
     );
     if (href) {
@@ -213,18 +185,15 @@ export function KpiCard({
   const content = (
     <>
       <div className="flex items-center gap-2">
-        <p className="font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#464e56]">
-          {label}
-        </p>
+        <p className={labelClassName}>{label}</p>
         <InfoTooltip label={label} helperText={helperText ?? ""} />
       </div>
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <p className="font-yahoo-product-sans text-[28px] font-bold leading-8 text-[#232a31]">
           {value}
         </p>
         {delta ? <DeltaChip delta={delta} trend={trend} /> : null}
       </div>
-      {chevronEl}
     </>
   );
   if (href) {
