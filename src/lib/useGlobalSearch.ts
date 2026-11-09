@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useDeletedContent } from "@/contexts/DeletedContentContext";
 import {
   getRecentlyPublishedItems,
   searchContentItems,
@@ -9,9 +10,10 @@ import {
 
 export type SearchPhase = "recent" | "searching" | "results";
 
-const SEARCH_DELAY_MS = 550;
+const SEARCH_DELAY_MS = 900;
 
 export function useGlobalSearch(query: string) {
+  const { isDeleted } = useDeletedContent();
   const [phase, setPhase] = useState<SearchPhase>("recent");
   const [items, setItems] = useState<SearchableContentItem[]>(() => getRecentlyPublishedItems());
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -36,5 +38,5 @@ export function useGlobalSearch(query: string) {
     };
   }, [query]);
 
-  return { phase, items };
+  return { phase, items: items.filter((item) => !isDeleted(item.title)) };
 }

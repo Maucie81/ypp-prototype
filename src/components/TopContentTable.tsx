@@ -7,7 +7,6 @@ import { Article, VideoCamera, ImageGallery } from "@yahoo/uds-icons";
 import { BrandIcon } from "@/components/BrandIcon";
 import { DeltaArrowIcon } from "@/components/DeltaArrowIcon";
 import { ContentDetailsModal } from "@/components/ContentDetailsModal";
-import { Toast } from "@/components/ui/Toast";
 import type { TopContentRow, ContentModalItem } from "@/lib/mockData";
 
 const COLUMNS: { key: keyof TopContentRow; header: string; align: "left" | "center" | "right" }[] = [
@@ -87,7 +86,6 @@ export function TopContentTable({
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [selectedArticle, setSelectedArticle] = useState<ContentModalItem | null>(null);
-  const [toastOpen, setToastOpen] = useState(false);
 
   const sorted = [...rows].sort((a, b) => compare(a, b, sortKey, sortDir));
 
@@ -161,13 +159,18 @@ export function TopContentTable({
           <button
             onClick={() => {
               setSelectedArticle({
-                id: `${row.rank}-${row.contentTitle}`,
+                // Title only: rank shifts when another row is deleted, and this id seeds the item's metadata.
+                id: `top-content-${row.contentTitle}`,
                 title: row.contentTitle,
-                description: `Published on ${new Date().toLocaleDateString()}`,
-                snippet: "During Thursday's interview with CNN, Vice President Kamala Harris reiterated her support for a bipartisan Senate bill that would have overhauled the country's immigration system in an effort to cut down on the number of undocumented migr...",
+                description: row.description,
+                snippet: row.description,
                 contentType: modalContentType(row.contentType),
-                thumbnailSeed: row.rank,
-                publishedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+                thumbnailSeed: row.thumbnailSeed,
+                thumbnailUrl: row.thumbnailUrl,
+                partnerUrl: row.partnerUrl,
+                publishedAt:
+                  row.publishedAt ??
+                  new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
                 status: "Published",
               });
             }}
@@ -208,15 +211,6 @@ export function TopContentTable({
           open={selectedArticle !== null}
           onClose={() => setSelectedArticle(null)}
           item={selectedArticle}
-          onDeleteConfirm={() => {
-            setSelectedArticle(null);
-            setToastOpen(true);
-          }}
-        />
-        <Toast
-          open={toastOpen}
-          message="Content deletion confirmed"
-          onClose={() => setToastOpen(false)}
         />
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b border-[#e0e4e9] bg-white shadow-[0_1px_0_0_#e0e4e9]">
@@ -244,15 +238,6 @@ export function TopContentTable({
         open={selectedArticle !== null}
         onClose={() => setSelectedArticle(null)}
         item={selectedArticle}
-        onDeleteConfirm={() => {
-          setSelectedArticle(null);
-          setToastOpen(true);
-        }}
-      />
-      <Toast
-        open={toastOpen}
-        message="Content deletion confirmed"
-        onClose={() => setToastOpen(false)}
       />
       <div className="w-full overflow-x-hidden">
         <table className="w-full table-fixed border-separate border-spacing-0">

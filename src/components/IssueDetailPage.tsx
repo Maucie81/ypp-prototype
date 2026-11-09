@@ -11,6 +11,7 @@ import { PublishStatusLabel, type PublishStatusLabelVariant } from "@/components
 import { DownloadButton } from "@/components/DownloadButton";
 import { TablePagination } from "@/components/TablePagination";
 import { ContentDetailsModal } from "@/components/ContentDetailsModal";
+import { useDeletedContent } from "@/contexts/DeletedContentContext";
 import { WarningIssueModal } from "@/components/WarningIssueModal";
 import { FailureIssueModal } from "@/components/FailureIssueModal";
 import { useTimeFilter } from "@/contexts/TimeFilterContext";
@@ -222,12 +223,17 @@ export function IssueDetailPage({
     () => getIssueDetailData(issueId, issueType, rangePreset),
     [issueId, issueType, rangePreset],
   );
-  const allItems = useMemo(
+  const { isDeleted } = useDeletedContent();
+  const issueItems = useMemo(
     () => getIssueContentItems(issueId, rangePreset),
     [issueId, rangePreset],
   );
+  const allItems = issueItems.filter((item) => !isDeleted(item.title));
 
-  const start = (page - 1) * pageSize;
+  // Deleting the only row on the last page must not strand the list on an empty page.
+  const lastPage = Math.max(1, Math.ceil(allItems.length / pageSize));
+  const currentPage = Math.min(page, lastPage);
+  const start = (currentPage - 1) * pageSize;
   const visibleItems = allItems.slice(start, start + pageSize);
 
   // Warning page: "Feed Health > Publishing vitals"
@@ -378,7 +384,7 @@ export function IssueDetailPage({
           <TablePagination
             totalRows={allItems.length}
             pageSize={pageSize}
-            currentPage={page}
+            currentPage={currentPage}
             onPageSizeChange={(s) => {
               setPageSize(s);
               setPage(1);

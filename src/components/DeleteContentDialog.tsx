@@ -16,6 +16,7 @@ const DELETE_REASONS = [
   "Wrong Feed",
   "Outdated",
   "Other",
+  "Just way too awesome",
 ];
 
 export function DeleteContentDialog({

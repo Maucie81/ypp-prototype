@@ -17,6 +17,7 @@ import { OPTIONS } from "@/components/filters/FilterBar";
 import { DeleteContentDialog } from "@/components/DeleteContentDialog";
 import { DownloadButton } from "@/components/DownloadButton";
 import { PublishStatusLabel, type PublishStatusLabelVariant } from "@/components/PublishStatusLabel";
+import { useDeletedContent } from "@/contexts/DeletedContentContext";
 import {
   getContentMetadata,
   type ContentModalItem,
@@ -62,12 +63,11 @@ const PERF_TABS: ContentPerfTab[] = [
 function ModalCard({
   item,
   onClose,
-  onDeleteConfirm,
 }: {
   item: ContentModalItem;
   onClose: () => void;
-  onDeleteConfirm: (item: ContentModalItem, reason: string) => void;
 }) {
+  const { deleteContent } = useDeletedContent();
   const [activeTab, setActiveTab] = useState<ContentPerfTab>("Views");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -84,7 +84,8 @@ function ModalCard({
     return Array.from(set);
   }
 
-  const thumbUrl = `https://picsum.photos/seed/${item.thumbnailSeed}/163/104`;
+  const thumbUrl = item.thumbnailUrl ?? `https://picsum.photos/seed/${item.thumbnailSeed}/163/104`;
+  const partnerUrl = item.partnerUrl ?? meta.partnerUrl;
 
   const chartOption = {
     animation: true,
@@ -172,7 +173,7 @@ function ModalCard({
   };
 
   const metaFields = [
-    { label: "Partner URL", value: meta.partnerUrl, href: meta.partnerUrl },
+    { label: "Partner URL", value: partnerUrl, href: partnerUrl },
     { label: "Yahoo URL", value: meta.yahooUrl, href: meta.yahooUrl },
     { label: "Source feed", value: meta.sourceFeed },
     { label: "GUID", value: meta.guid },
@@ -399,9 +400,10 @@ function ModalCard({
         open={deleteDialogOpen}
         contentTypeLabel={contentTypeLabel(item.contentType).toLowerCase()}
         onCancel={() => setDeleteDialogOpen(false)}
-        onConfirm={(reason) => {
+        onConfirm={() => {
           setDeleteDialogOpen(false);
-          onDeleteConfirm(item, reason);
+          deleteContent(item.title);
+          onClose();
         }}
       />
     </div>
@@ -414,25 +416,14 @@ export function ContentDetailsModal({
   open,
   onClose,
   item,
-  onDeleteConfirm,
 }: {
   open: boolean;
   onClose: () => void;
   item: ContentModalItem | null;
-  onDeleteConfirm?: (item: ContentModalItem, reason: string) => void;
 }) {
   return (
     <Modal open={open && item !== null} onClose={onClose} className="max-w-[min(1312px,calc(100vw-80px))]">
-      {item && (
-        <ModalCard
-          item={item}
-          onClose={onClose}
-          onDeleteConfirm={(deletedItem, reason) => {
-            onClose();
-            onDeleteConfirm?.(deletedItem, reason);
-          }}
-        />
-      )}
+      {item && <ModalCard item={item} onClose={onClose} />}
     </Modal>
   );
 }

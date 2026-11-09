@@ -17,21 +17,29 @@ function ContentTypeIcon({ type }: { type: string }) {
 function ResultRow({
   item,
   onSelect,
+  revealIndex,
 }: {
   item: SearchableContentItem;
   onSelect: (item: SearchableContentItem) => void;
+  /** Position among search results, for the staggered entrance. Omit to skip the entrance. */
+  revealIndex?: number;
 }) {
-  const thumbUrl = `https://picsum.photos/seed/${item.thumbnailSeed}/163/104`;
+  const thumbUrl = item.thumbnailUrl ?? `https://picsum.photos/seed/${item.thumbnailSeed}/163/104`;
+  const reveals = revealIndex !== undefined;
 
   return (
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className="flex w-full shrink-0 items-center gap-6 px-8 py-5 text-left transition-colors hover:bg-[#f5f8fa]"
+      className={`flex w-full shrink-0 items-center gap-6 px-8 py-5 text-left transition-colors hover:bg-[#f5f8fa] ${
+        reveals ? "search-result-in" : ""
+      }`}
+      // Only the rows on screen stagger; the rest would just add a wait when scrolled to.
+      style={reveals ? { animationDelay: `${Math.min(revealIndex, 5) * 150}ms` } : undefined}
     >
       <div className="h-[104px] w-[163px] shrink-0 overflow-hidden rounded-[4px] bg-[#e0e4e9]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={thumbUrl} alt="" width={163} height={104} className="h-full w-full object-cover" />
+        <img src={thumbUrl} alt="" width={163} height={104} loading="lazy" className="h-full w-full object-cover" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-center gap-2">
@@ -57,9 +65,12 @@ function ResultRow({
   );
 }
 
-function SkeletonRow() {
+function SkeletonRow({ index }: { index: number }) {
   return (
-    <div className="flex w-full shrink-0 items-center gap-6 px-8 py-5 animate-pulse">
+    <div
+      className="search-skeleton-row flex w-full shrink-0 items-center gap-6 px-8 py-5"
+      style={{ animationDelay: `${index * 90}ms` }}
+    >
       <div className="h-[104px] w-[163px] shrink-0 rounded-[4px] bg-[#e0e4e9]" />
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <div className="flex items-center gap-2">
@@ -74,6 +85,15 @@ function SkeletonRow() {
           <div className="h-3 w-16 rounded bg-[#e0e4e9]" />
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Enough rows to reach the panel's max height, so it doesn't resize when results replace them. */
+function SkeletonRows() {
+  return (
+    <div className="min-h-0 flex-1 divide-y divide-[#f5f5f5] overflow-hidden">
+      {Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} index={i} />)}
     </div>
   );
 }
@@ -109,9 +129,7 @@ export function GlobalSearchDropdown({
 
       {/* Body */}
       {phase === "searching" ? (
-        <div className="flex-1 overflow-y-auto divide-y divide-[#f5f5f5]">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />)}
-        </div>
+        <SkeletonRows />
       ) : items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-1 py-24">
           <p className="font-yahoo-product-sans text-[14px] font-medium leading-5 text-[#232a31]">
@@ -122,10 +140,22 @@ export function GlobalSearchDropdown({
           </p>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto">
-          {items.map((item) => (
-            <ResultRow key={item.id} item={item} onSelect={onSelectItem} />
-          ))}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {items.map((item, i) => (
+              <ResultRow
+                key={item.id}
+                item={item}
+                onSelect={onSelectItem}
+                revealIndex={phase === "results" ? i : undefined}
+              />
+            ))}
+          </div>
+          {phase === "results" && (
+            <div className="search-skeleton-out pointer-events-none absolute inset-0 overflow-hidden bg-white" aria-hidden>
+              <SkeletonRows />
+            </div>
+          )}
         </div>
       )}
 

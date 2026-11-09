@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { FAIRE_ARTICLES, FAIRE_PROVIDER } from "@/lib/faireArticles";
 
 export type KpiId =
   | "traffic"
@@ -820,6 +821,13 @@ export interface TopContentRow {
   ctr: number;
   dwell: number;
   engagements: number;
+  description: string;
+  /** Derived from the title so a row keeps its placeholder image when ranks shift. */
+  thumbnailSeed: number;
+  /** Set on content with real source data (Faire articles); others use mock values. */
+  thumbnailUrl?: string;
+  partnerUrl?: string;
+  publishedAt?: string;
 }
 
 export interface BrandComparisonRow {
@@ -1448,18 +1456,37 @@ export function getTopContentRows(range?: DateRangePreset): TopContentRow[] {
     const seed = `top-content-${range}`;
     faker.seed(seed.split("").reduce((a, c) => a + c.charCodeAt(0), 20260227));
   }
-  const rows: TopContentRow[] = faker.helpers.shuffle([...STORIES]).map((story, i) => ({
-    rank: i + 1,
-    contentTitle: story.title,
-    contentType: faker.helpers.arrayElement(CONTENT_TYPES),
-    brand: story.brand,
+  const metrics = () => ({
     views: faker.number.int({ min: 120_000, max: 2_800_000 }),
     visitors: faker.number.int({ min: 80_000, max: 1_200_000 }),
     reach: faker.number.int({ min: 50_000, max: 900_000 }),
     ctr: Number(faker.number.float({ min: 0.5, max: 4.2 }).toFixed(2)),
     dwell: Number(faker.number.float({ min: 25, max: 210 }).toFixed(1)),
     engagements: faker.number.int({ min: 1_000, max: 85_000 }),
+  });
+  const storyRows: TopContentRow[] = faker.helpers.shuffle([...STORIES]).map((story, i) => ({
+    rank: i + 1,
+    contentTitle: story.title,
+    contentType: faker.helpers.arrayElement(CONTENT_TYPES),
+    brand: story.brand,
+    description: story.description,
+    thumbnailSeed: story.title.split("").reduce((a, c) => a * 31 + c.charCodeAt(0), 7) % 100000,
+    ...metrics(),
   }));
+  // Random views scatter these through the ranking; they're always articles, unlike the mock stories.
+  const faireRows: TopContentRow[] = FAIRE_ARTICLES.map((article, i) => ({
+    rank: storyRows.length + i + 1,
+    contentTitle: article.title,
+    contentType: "Article",
+    brand: FAIRE_PROVIDER,
+    description: article.description,
+    thumbnailSeed: 0,
+    thumbnailUrl: article.thumbnailUrl,
+    partnerUrl: article.url,
+    publishedAt: article.publishedAt,
+    ...metrics(),
+  }));
+  const rows = [...storyRows, ...faireRows];
   const sorted = rows.sort((a, b) => b.views - a.views).map((row, idx) => ({ ...row, rank: idx + 1 }));
   if (range) faker.seed(20260227);
   return sorted;
@@ -1704,6 +1731,10 @@ export interface ContentModalItem {
   snippet: string;
   contentType: FeedContentType;
   thumbnailSeed: number;
+  /** Real image for the content; falls back to a placeholder from thumbnailSeed. */
+  thumbnailUrl?: string;
+  /** Real source link for the content; falls back to a mock partner URL. */
+  partnerUrl?: string;
   publishedAt: string;
   status?: string;
   /** The "Issues detected" issue this item was opened from; its pop-up explains that issue. */
@@ -2384,6 +2415,8 @@ export interface SearchableContentItem {
   publishedAt: string;
   status: FeedItemStatus;
   provider: string;
+  thumbnailUrl?: string;
+  partnerUrl?: string;
 }
 
 /** Deterministic corpus of publisher content used to power the global search dropdown. */
@@ -2409,8 +2442,21 @@ export function getSearchableContentItems(): SearchableContentItem[] {
     };
   });
 
+  const faireItems: SearchableContentItem[] = FAIRE_ARTICLES.map((article) => ({
+    id: faker.string.uuid(),
+    title: article.title,
+    description: article.description,
+    contentType: "article",
+    thumbnailSeed: faker.number.int({ min: 100, max: 999 }),
+    publishedAt: article.publishedAt,
+    status: "Published",
+    provider: FAIRE_PROVIDER,
+    thumbnailUrl: article.thumbnailUrl,
+    partnerUrl: article.url,
+  }));
+
   faker.seed(20260227);
-  return items;
+  return [...items, ...faireItems];
 }
 
 /** Most recently published items, shown when the search field is opened with no query. */
@@ -2419,16 +2465,14 @@ export function getRecentlyPublishedItems(limit = 8): SearchableContentItem[] {
 }
 
 /** Matches by title, content type, provider, or id (UUID/GUID) — per the partner search spec. */
-export function searchContentItems(query: string, limit = 8): SearchableContentItem[] {
+export function searchContentItems(query: string): SearchableContentItem[] {
   const q = query.trim().toLowerCase();
-  if (!q) return getRecentlyPublishedItems(limit);
-  return getSearchableContentItems()
-    .filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.contentType.toLowerCase().includes(q) ||
-        item.provider.toLowerCase().includes(q) ||
-        item.id.toLowerCase().includes(q),
-    )
-    .slice(0, limit);
+  if (!q) return getRecentlyPublishedItems();
+  return getSearchableContentItems().filter(
+    (item) =>
+      item.title.toLowerCase().includes(q) ||
+      item.contentType.toLowerCase().includes(q) ||
+      item.provider.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q),
+  );
 }

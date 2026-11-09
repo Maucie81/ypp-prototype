@@ -10,7 +10,7 @@ import { RankedContentTable } from "@/components/RankedContentTable";
 import { VideoCard } from "@/components/VideoCard";
 import { DownloadButton } from "@/components/DownloadButton";
 import { Icon } from "@yahoo/uds";
-import { ChevronRight, Eye, Article, Person, Megaphone, Graph, Play, Clock, SpeechBubble } from "@yahoo/uds-icons";
+import { ChevronRight } from "@yahoo/uds-icons";
 import Link from "next/link";
 import { useTimeFilter } from "@/contexts/TimeFilterContext";
 import { useBrand } from "@/contexts/BrandContext";
@@ -23,17 +23,6 @@ import {
   getVideoSeriesData,
 } from "@/lib/mockData";
 import type { DateRangePreset, KpiId } from "@/lib/mockData";
-
-const kpiIconMap: Record<KpiId, unknown> = {
-  traffic: Eye,
-  revenue: Article,
-  ctr: Person,
-  errorRate: Megaphone,
-  activeFeeds: Graph,
-  fillRate: Play,
-  avgPosition: Clock,
-  contentItems: SpeechBubble,
-};
 
 /** Map Overview KPI id to Content performance dropdown route. */
 function getKpiContentPerformanceHref(id: KpiId): string {
@@ -107,15 +96,23 @@ export default function OverviewPage() {
       {showSkeleton ? (
         <>
           {/* KPI skeletons */}
-          <section>
-            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 animate-pulse">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="rounded-[10px] border border-[#e0e4e9] bg-[#fafafa] px-5 py-4 flex flex-col gap-4">
-                  <div className="h-8 flex items-center border-b border-[#e0e4e9] pb-2 gap-2">
-                    <div className="h-4 w-4 rounded bg-[#e0e4e9] shrink-0" />
+          <section className="flex flex-col gap-4 animate-pulse">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="flex min-h-[112px] items-stretch gap-4 rounded-[8px] border border-[#e0e4e9] bg-[#fafafa] p-6">
+                  <div className="flex flex-1 flex-col justify-between gap-3">
                     <div className="h-3.5 w-24 rounded bg-[#e0e4e9]" />
+                    <div className="h-8 w-36 rounded bg-[#e0e4e9]" />
                   </div>
-                  <div className="h-7 w-28 rounded bg-[#e0e4e9]" />
+                  <div className="flex-1 self-end h-10 rounded bg-[#e0e4e9]" />
+                </div>
+              ))}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex min-h-[104px] flex-col justify-between gap-3 rounded-[8px] border border-[#e0e4e9] bg-[#fafafa] p-6">
+                  <div className="h-3.5 w-24 rounded bg-[#e0e4e9]" />
+                  <div className="h-8 w-28 rounded bg-[#e0e4e9]" />
                 </div>
               ))}
             </div>
@@ -176,9 +173,24 @@ export default function OverviewPage() {
       ) : (
         <>
           {/* KPI cards */}
-          <section>
-            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-              {[...primaryKpis, ...secondaryKpis].map((kpi) => (
+          <section className="flex flex-col gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {primaryKpis.map((kpi) => (
+                <KpiCard
+                  key={kpi.id}
+                  variant="primary"
+                  label={kpi.label}
+                  value={kpi.value}
+                  delta={kpi.delta}
+                  trend={kpi.trend}
+                  helperText={kpi.helperText}
+                  sparklineData={kpi.sparklineData}
+                  href={getKpiContentPerformanceHref(kpi.id)}
+                />
+              ))}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {secondaryKpis.map((kpi) => (
                 <KpiCard
                   key={kpi.id}
                   variant="secondary"
@@ -188,8 +200,6 @@ export default function OverviewPage() {
                   trend={kpi.trend}
                   helperText={kpi.helperText}
                   href={getKpiContentPerformanceHref(kpi.id)}
-                  comparisonDate={kpi.comparisonDate}
-                  icon={kpiIconMap[kpi.id]}
                 />
               ))}
             </div>

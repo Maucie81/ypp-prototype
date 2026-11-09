@@ -16,7 +16,7 @@ import { TablePagination } from "@/components/TablePagination";
 import { ContentDetailsModal } from "@/components/ContentDetailsModal";
 import { WarningIssueModal } from "@/components/WarningIssueModal";
 import { FailureIssueModal } from "@/components/FailureIssueModal";
-import { Toast } from "@/components/ui/Toast";
+import { useDeletedContent } from "@/contexts/DeletedContentContext";
 import { useTimeFilter } from "@/contexts/TimeFilterContext";
 import {
   getFeedVitalsRowById,
@@ -380,7 +380,7 @@ export default function FeedHealthDetailPage({
   const [contentModal, setContentModal] = useState<ContentModalItem | null>(null);
   const [warnModal, setWarnModal] = useState<ContentModalItem | null>(null);
   const [failModal, setFailModal] = useState<ContentModalItem | null>(null);
-  const [toastOpen, setToastOpen] = useState(false);
+  const { isDeleted } = useDeletedContent();
 
   function openContentModal(item: ContentModalItem) {
     setContentModal(item);
@@ -393,7 +393,8 @@ export default function FeedHealthDetailPage({
   const feed = useMemo(() => getFeedVitalsRowById(id, rangePreset), [id, rangePreset]);
   const kpis = useMemo(() => getFeedDetailKpis(id, rangePreset), [id, rangePreset]);
   const allIssues = useMemo(() => getIssuesDetected(rangePreset), [rangePreset]);
-  const allRecent = useMemo(() => getFeedRecentItems(id, rangePreset), [id, rangePreset]);
+  const feedRecent = useMemo(() => getFeedRecentItems(id, rangePreset), [id, rangePreset]);
+  const allRecent = feedRecent.filter((item) => !isDeleted(item.title));
 
   if (!feed) {
     return (
@@ -408,7 +409,9 @@ export default function FeedHealthDetailPage({
   const issueStart = (issuePage - 1) * issuePageSize;
   const visibleIssues = allIssues.slice(issueStart, issueStart + issuePageSize);
 
-  const recentStart = (recentPage - 1) * recentPageSize;
+  // Deleting the only row on the last page must not strand the list on an empty page.
+  const currentRecentPage = Math.min(recentPage, Math.max(1, Math.ceil(allRecent.length / recentPageSize)));
+  const recentStart = (currentRecentPage - 1) * recentPageSize;
   const visibleRecent = allRecent.slice(recentStart, recentStart + recentPageSize);
 
   return (
@@ -518,7 +521,7 @@ export default function FeedHealthDetailPage({
           <TablePagination
             totalRows={allRecent.length}
             pageSize={recentPageSize}
-            currentPage={recentPage}
+            currentPage={currentRecentPage}
             onPageSizeChange={(size) => { setRecentPageSize(size); setRecentPage(1); }}
             onPageChange={setRecentPage}
             embedded
@@ -532,15 +535,6 @@ export default function FeedHealthDetailPage({
         open={contentModal !== null}
         onClose={() => setContentModal(null)}
         item={contentModal}
-        onDeleteConfirm={() => {
-          setContentModal(null);
-          setToastOpen(true);
-        }}
-      />
-      <Toast
-        open={toastOpen}
-        message="Content deletion confirmed"
-        onClose={() => setToastOpen(false)}
       />
       <WarningIssueModal
         open={warnModal !== null}

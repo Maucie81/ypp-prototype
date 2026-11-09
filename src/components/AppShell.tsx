@@ -4,6 +4,7 @@ import { ReactNode, Suspense, useState } from "react";
 import { usePathname } from "next/navigation";
 import { TimeFilterProvider } from "@/contexts/TimeFilterContext";
 import { BrandProvider } from "@/contexts/BrandContext";
+import { DeletedContentProvider } from "@/contexts/DeletedContentContext";
 import { GlobalHeader } from "./GlobalHeader";
 import { Sidebar } from "./Sidebar";
 
@@ -17,6 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <BrandProvider>
+      <DeletedContentProvider>
       <div className="flex h-screen flex-col overflow-hidden bg-white text-[#232a31]">
         {/* Sticky global header */}
         <div className="relative z-50 shrink-0">
@@ -51,6 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
+      </DeletedContentProvider>
     </BrandProvider>
   );
 }

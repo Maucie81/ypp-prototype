@@ -1,5 +1,5 @@
 import { Icon } from "@yahoo/uds";
-import { Coin, FilmReel, Heart, Newsletter, Trophy } from "@yahoo/uds-icons";
+import { Coin, FilmReel, Heart, Lightbulb, Newsletter, Trophy } from "@yahoo/uds-icons";
 
 /**
  * Placeholder marks, not real logos. To use a real logo, replace a brand's entry here.
@@ -11,6 +11,7 @@ const BRAND_MARKS = {
   "Yahoo Finance": Coin,
   "Yahoo Entertainment": FilmReel,
   "Yahoo Life": Heart,
+  "Faire Design": Lightbulb,
 } as const;
 
 function isMarkedBrand(brand: string): brand is keyof typeof BRAND_MARKS {

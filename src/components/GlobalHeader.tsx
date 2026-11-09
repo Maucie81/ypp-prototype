@@ -51,6 +51,8 @@ export function GlobalHeader({ onToggleSidebar, sidebarCollapsed }: GlobalHeader
       snippet: item.description,
       contentType: item.contentType,
       thumbnailSeed: item.thumbnailSeed,
+      thumbnailUrl: item.thumbnailUrl,
+      partnerUrl: item.partnerUrl,
       publishedAt: item.publishedAt,
       status: item.status,
     });

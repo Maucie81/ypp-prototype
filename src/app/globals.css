@@ -57,6 +57,85 @@
   animation: fade-in-value 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Global search loading: a soft highlight sweeps each skeleton row, then results rise in. */
+@keyframes search-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes search-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.search-skeleton-row {
+  position: relative;
+  overflow: hidden;
+  animation: search-row-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* White on a white panel, so the highlight only shows where it crosses the grey blocks. */
+.search-skeleton-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.8) 50%, transparent 80%);
+  animation: search-sweep 1100ms cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: inherit;
+}
+
+@keyframes search-result-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes search-skeleton-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.search-result-in {
+  animation: search-result-in 1000ms cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+
+/* Placeholders stay over the arriving results and fade away, so the two crossfade. */
+.search-skeleton-out {
+  animation: search-skeleton-out 700ms ease-out forwards;
+}
+
+.search-skeleton-out .search-skeleton-row,
+.search-skeleton-out .search-skeleton-row::after {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-skeleton-row,
+  .search-skeleton-row::after,
+  .search-result-in {
+    animation: none;
+  }
+
+  .search-skeleton-out {
+    display: none;
+  }
+}
+
 /* Yahoo Product Sans (static) */
 @font-face {
   font-family: "Yahoo Product Sans";
